@@ -1,34 +1,28 @@
 <?php
-declare(strict_types=1); // Added strict types 
+declare(strict_types=1);
 
 namespace IcapClient;
 
-use RuntimeException;
 use Socket;
+use IcapClient\Exception\IcapClientException;
+use IcapClient\Exception\IcapConnectionException;
+use IcapClient\Exception\IcapResponseException;
+use IcapClient\IcapProtocolConstants;
 
 class IcapClient
 {
-    // Constants for ICAP methods and headers for better readability and maintainability
-    private const ICAP_METHOD_OPTIONS = 'OPTIONS';
-    private const ICAP_METHOD_RESPMOD = 'RESPMOD';
-    private const ICAP_METHOD_REQMOD = 'REQMOD';
-
-    private const HEADER_HOST = 'Host';
-    private const HEADER_USER_AGENT = 'User-Agent';
-    private const HEADER_CONNECTION = 'Connection';
-    private const HEADER_ENCAPSULATED = 'Encapsulated';
 
     /** @var string Address of ICAP server */
-    private string $host; // Added type hint 
+    private string $host;
 
     /** @var int Port number */
-    private int $port; // Added type hint 
+    private int $port;
 
     /** @var ?Socket Socket object */
-    private ?Socket $socket = null; // Added type hint and default null value 
+    private ?Socket $socket = null;
 
     /** @var string User agent string */
-    private string $userAgent = 'PHP-ICAP-CLIENT/0.5.0'; // Changed to private for better encapsulation 
+    private string $userAgent = 'PHP-ICAP-CLIENT/0.5.0';
 
     /**
      * Constructor
@@ -36,7 +30,7 @@ class IcapClient
      * @param string $host IP address of ICAP server
      * @param int $port Port number
      */
-    public function __construct(string $host, int $port) // Added type hints
+    public function __construct(string $host, int $port)
     {
         $this->host = $host;
         $this->port = $port;
@@ -46,17 +40,17 @@ class IcapClient
      * Establish a socket connection to the configured ICAP server.
      *
      * The socket is closed and reset if the connection attempt fails and a
-     * {@see RuntimeException} is thrown.
+     * {@see IcapConnectionException} is thrown.
      *
      * @return bool True on success
-     * @throws RuntimeException If the socket cannot be created or the
+     * @throws IcapConnectionException If the socket cannot be created or the
      *     connection fails
      */
     private function connect(): bool
     {
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if ($this->socket === false) { // Improved error check for socket_create 
-            throw new RuntimeException('Failed to create socket.');
+        if ($this->socket === false) {
+            throw new IcapConnectionException('Failed to create socket.');
         }
 
         if (!socket_connect($this->socket, $this->host, $this->port)) {
@@ -64,7 +58,7 @@ class IcapClient
             $errorMessage = socket_strerror(socket_last_error($this->socket));
             socket_close($this->socket);
             $this->socket = null;
-            throw new RuntimeException(
+            throw new IcapConnectionException(
                 "Cannot connect to icap://{$this->host}:{$this->port} (Socket error: {$errorMessage})"
             );
         }
@@ -75,7 +69,7 @@ class IcapClient
     /**
      * Close connection to ICAP server
      */
-    private function disconnect(): void // Added return type hint
+    private function disconnect(): void
     {
         if ($this->socket instanceof Socket) { // Check if socket is valid before shutdown/close 
             socket_shutdown($this->socket);
@@ -89,7 +83,7 @@ class IcapClient
      *
      * @return int Socket error code
      */
-    public function getLastSocketError(): int // Added return type hint
+    public function getLastSocketError(): int
     {
         return socket_last_error($this->socket);
     }
@@ -124,18 +118,18 @@ class IcapClient
      * @param array $headers Array of headers
      * @return string Request string
      */
-    public function getRequest(string $method, string $service, array $body = [], array $headers = []): string // Added type hints
+    public function getRequest(string $method, string $service, array $body = [], array $headers = []): string
     {
-        if (!array_key_exists(self::HEADER_HOST, $headers)) { // Using constant 
-            $headers[self::HEADER_HOST] = $this->host;
+        if (!array_key_exists(IcapProtocolConstants::HEADER_HOST, $headers)) {
+            $headers[IcapProtocolConstants::HEADER_HOST] = $this->host;
         }
 
-        if (!array_key_exists(self::HEADER_USER_AGENT, $headers)) { // Using constant 
-            $headers[self::HEADER_USER_AGENT] = $this->userAgent;
+        if (!array_key_exists(IcapProtocolConstants::HEADER_USER_AGENT, $headers)) {
+            $headers[IcapProtocolConstants::HEADER_USER_AGENT] = $this->userAgent;
         }
 
-        if (!array_key_exists(self::HEADER_CONNECTION, $headers)) { // Using constant 
-            $headers[self::HEADER_CONNECTION] = 'close';
+        if (!array_key_exists(IcapProtocolConstants::HEADER_CONNECTION, $headers)) {
+            $headers[IcapProtocolConstants::HEADER_CONNECTION] = 'close';
         }
 
         $bodyData = '';
@@ -143,14 +137,14 @@ class IcapClient
         $encapsulated = [];
         foreach ($body as $type => $data) {
             switch ($type) {
-                case 'req-hdr':
-                case 'res-hdr':
+                case IcapProtocolConstants::SECTION_REQ_HDR:
+                case IcapProtocolConstants::SECTION_RES_HDR:
                     $encapsulated[$type] = strlen($bodyData);
                     $bodyData .= $data;
                     break;
 
-                case 'req-body':
-                case 'res-body':
+                case IcapProtocolConstants::SECTION_REQ_BODY:
+                case IcapProtocolConstants::SECTION_RES_BODY:
                     $encapsulated[$type] = strlen($bodyData);
                     $bodyData .= dechex(strlen($data)) . "\r\n";
                     $bodyData .= $data;
@@ -163,19 +157,18 @@ class IcapClient
         if ($hasBody) {
             $bodyData .= "0\r\n\r\n";
         } elseif (count($encapsulated) > 0) {
-            $encapsulated['null-body'] = strlen($bodyData);
+            $encapsulated[IcapProtocolConstants::SECTION_NULL_BODY] = strlen($bodyData);
         }
 
         if (count($encapsulated) > 0) {
-            $headers[self::HEADER_ENCAPSULATED] = ''; // Using constant 
+            $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] = '';
             foreach ($encapsulated as $section => $offset) {
-                $headers[self::HEADER_ENCAPSULATED] .= $headers[self::HEADER_ENCAPSULATED] === '' ?
-                    '' : ', ';
-                $headers[self::HEADER_ENCAPSULATED] .= "{$section}={$offset}";
+                $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] .= $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] === '' ? '' : ', ';
+                $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] .= "{$section}={$offset}";
             }
         }
 
-        $request = "{$method} icap://{$this->host}/{$service} ICAP/1.0\r\n";
+        $request = "{$method} icap://{$this->host}/{$service} " . IcapProtocolConstants::PROTOCOL_PREFIX . IcapProtocolConstants::PROTOCOL_VERSION . "\r\n";
         foreach ($headers as $header => $value) {
             $request .= "{$header}: {$value}\r\n";
         }
@@ -191,11 +184,11 @@ class IcapClient
      *
      * @param string $service ICAP service
      * @return array Response array
-     * @throws RuntimeException
+     * @throws IcapClientException
      */
-    public function options(string $service): array // Added type hints
+    public function options(string $service): array
     {
-        $request = $this->getRequest(self::ICAP_METHOD_OPTIONS, $service); // Using constant
+        $request = $this->getRequest(IcapProtocolConstants::METHOD_OPTIONS, $service);
         $response = $this->send($request);
 
         return $this->parseResponse($response);
@@ -208,11 +201,11 @@ class IcapClient
      * @param array $body Request body data
      * @param array $headers Array of headers
      * @return array Response array
-     * @throws RuntimeException
+     * @throws IcapClientException
      */
-    public function respmod(string $service, array $body = [], array $headers = []): array // Added type hints
+    public function respmod(string $service, array $body = [], array $headers = []): array
     {
-        $request = $this->getRequest(self::ICAP_METHOD_RESPMOD, $service, $body, $headers); // Using constant
+        $request = $this->getRequest(IcapProtocolConstants::METHOD_RESPMOD, $service, $body, $headers);
         $response = $this->send($request);
 
         return $this->parseResponse($response);
@@ -225,11 +218,11 @@ class IcapClient
      * @param array $body Request body data
      * @param array $headers Array of headers
      * @return array Response array
-     * @throws RuntimeException
+     * @throws IcapClientException
      */
-    public function reqmod(string $service, array $body = [], array $headers = []): array // Added type hints
+    public function reqmod(string $service, array $body = [], array $headers = []): array
     {
-        $request = $this->getRequest(self::ICAP_METHOD_REQMOD, $service, $body, $headers); // Using constant
+        $request = $this->getRequest(IcapProtocolConstants::METHOD_REQMOD, $service, $body, $headers);
         $response = $this->send($request);
 
         return $this->parseResponse($response);
@@ -240,11 +233,11 @@ class IcapClient
      *
      * @param string $request Request string
      * @return string Response string
-     * @throws RuntimeException
+     * @throws IcapClientException
      */
-    public function send(string $request): string // Added type hint
+    public function send(string $request): string
     {
-        // connect() now throws RuntimeException with more detail 
+        // connect() now throws a specific connection exception with more detail
         $this->connect();
 
         socket_write($this->socket, $request);
@@ -263,9 +256,9 @@ class IcapClient
      *
      * @param string $response Response string
      * @return array Response array
-     * @throws RuntimeException
+     * @throws IcapResponseException
      */
-    private function parseResponse(string $response): array // Added type hint
+    private function parseResponse(string $response): array
     {
         $responseArray = [
             'protocol' => [],
@@ -275,8 +268,8 @@ class IcapClient
         ];
         foreach (preg_split('/\r?\n/', $response) as $line) {
             if ([] === $responseArray['protocol']) {
-                if (0 !== strpos($line, 'ICAP/')) {
-                    throw new RuntimeException('Unknown ICAP response');
+                if (0 !== strpos($line, IcapProtocolConstants::PROTOCOL_PREFIX)) {
+                    throw new IcapResponseException('Unknown ICAP response');
                 }
 
                 $parts = preg_split('/\ +/', $line, 3);
@@ -305,9 +298,9 @@ class IcapClient
         $body = preg_split('/\r?\n\r?\n/', $response, 2);
         if (isset($body[1])) {
             $responseArray['rawBody'] = $body[1];
-            if (array_key_exists(self::HEADER_ENCAPSULATED, $responseArray['headers'])) { // Using constant 
+            if (array_key_exists(IcapProtocolConstants::HEADER_ENCAPSULATED, $responseArray['headers'])) {
                 $encapsulated = [];
-                $params = preg_split('/, /', $responseArray['headers'][self::HEADER_ENCAPSULATED]); // Using constant 
+                $params = preg_split('/, /', $responseArray['headers'][IcapProtocolConstants::HEADER_ENCAPSULATED]);
 
                 if (count($params) > 0) {
                     foreach ($params as $param) {
@@ -321,15 +314,15 @@ class IcapClient
                 }
 
                 foreach ($encapsulated as $section => $offset) {
-                    $data = substr($body[1], (int)$offset); // Cast offset to int
+                    $data = substr($body[1], (int)$offset);
                     switch ($section) {
-                        case 'req-hdr':
-                        case 'res-hdr':
+                        case IcapProtocolConstants::SECTION_REQ_HDR:
+                        case IcapProtocolConstants::SECTION_RES_HDR:
                             $responseArray['body'][$section] = preg_split('/\r?\n\r?\n/', $data, 2)[0];
                             break;
 
-                        case 'req-body':
-                        case 'res-body':
+                        case IcapProtocolConstants::SECTION_REQ_BODY:
+                        case IcapProtocolConstants::SECTION_RES_BODY:
                             $parts = preg_split('/\r?\n/', $data, 2);
                             if (count($parts) === 2) {
                                 $responseArray['body'][$section] = substr($parts[1], 0, hexdec($parts[0]));
