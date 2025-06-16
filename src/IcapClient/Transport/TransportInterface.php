@@ -42,4 +42,10 @@ interface TransportInterface
 
     /** Get read timeout in seconds. */
     public function getReadTimeout(): float;
+
+    /** Set read buffer size in bytes. */
+    public function setReadBufferSize(int $bufferSize): void;
+
+    /** Get read buffer size in bytes. */
+    public function getReadBufferSize(): int;
 }

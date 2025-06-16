@@ -22,6 +22,8 @@ class IcapTransport implements TransportInterface
     private bool $connected = false;
     private int $maxResponseSize = 10485760; // 10 MiB
     private float $readTimeout = 5.0;
+    /** @var int Size of read buffer in bytes */
+    private int $readBufferSize = 8192;
 
     public function __construct(string $host, int $port, SocketClientInterface $socketClient = null)
     {
@@ -59,6 +61,16 @@ class IcapTransport implements TransportInterface
     public function getReadTimeout(): float
     {
         return $this->readTimeout;
+    }
+
+    public function setReadBufferSize(int $bufferSize): void
+    {
+        $this->readBufferSize = $bufferSize;
+    }
+
+    public function getReadBufferSize(): int
+    {
+        return $this->readBufferSize;
     }
 
     public function getLastSocketError(): int
@@ -132,7 +144,7 @@ class IcapTransport implements TransportInterface
                 throw new IcapTimeoutException('Read timeout exceeded');
             }
 
-            $buffer = $this->socketClient->read(2048);
+            $buffer = $this->socketClient->read($this->readBufferSize);
 
             if ($buffer === '') {
                 if ($this->socketClient->getLastError() !== 0) {

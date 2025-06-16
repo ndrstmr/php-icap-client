@@ -152,9 +152,11 @@ class PhpSocketClient implements SocketClientInterface
         }
 
         $read = [$this->socket];
+        $write = null;
+        $except = null;
         $sec = (int) $timeout;
         $usec = (int) (($timeout - $sec) * 1_000_000);
-        $result = @socket_select($read, $write = null, $except = null, $sec, $usec);
+        $result = @socket_select($read, $write, $except, $sec, $usec);
         if ($result === false) {
             return false;
         }
