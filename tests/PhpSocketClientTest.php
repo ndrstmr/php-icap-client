@@ -34,4 +34,17 @@ class PhpSocketClientTest extends TestCase
 
         $this->assertIsInt($client->getLastError());
     }
+
+    public function testTimeoutConfiguration()
+    {
+        $client = new PhpSocketClient(1.5, 2.5);
+        $this->assertSame(1.5, $client->getReadTimeout());
+        $this->assertSame(2.5, $client->getWriteTimeout());
+
+        $client->setReadTimeout(3.0);
+        $this->assertSame(3.0, $client->getReadTimeout());
+
+        $client->setWriteTimeout(4.0);
+        $this->assertSame(4.0, $client->getWriteTimeout());
+    }
 }
