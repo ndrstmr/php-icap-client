@@ -143,6 +143,22 @@ class IcapClient
     }
 
     /**
+     * Set the read buffer size in bytes.
+     */
+    public function setReadBufferSize(int $bufferSize): void
+    {
+        $this->transport->setReadBufferSize($bufferSize);
+    }
+
+    /**
+     * Get the read buffer size in bytes.
+     */
+    public function getReadBufferSize(): int
+    {
+        return $this->transport->getReadBufferSize();
+    }
+
+    /**
      * Read the contents of a file and throw an exception on failure.
      *
      * @throws IcapFileException

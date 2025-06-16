@@ -58,6 +58,19 @@ therefore do not trigger a timeout as long as more bytes keep arriving. If no
 data becomes available within the configured timeout, an
 `IcapTimeoutException` is thrown.
 
+### Read Buffer Size
+
+The transport reads data in chunks controlled by `setReadBufferSize()`. The
+default buffer size is 8192 bytes. Reduce this value when working with
+non‑blocking socket clients to limit how much data is read at a time.
+
+### Non‑blocking Sockets
+
+Custom implementations of `SocketClientInterface` may return immediately when no
+data is available (for example using `socket_set_nonblock()` or `stream_select`).
+The provided `PhpSocketClient` remains blocking by default but can be swapped
+out for a non‑blocking variant.
+
 ## Running Tests
 
 Execute the following command to run the test suite:
