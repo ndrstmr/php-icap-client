@@ -219,6 +219,17 @@ class IcapClient
     }
 
     /**
+     * Generate request data as an iterable. Body sections provided as
+     * {@see \Generator} or iterable will be streamed when sending.
+     */
+    public function getRequestIterable(string $method, string $service, array $body = [], array $headers = []): iterable
+    {
+        $icapRequest = new IcapRequest($method, $this->host, $service, $headers, $body);
+
+        return $this->requestFormatter->formatIterable($icapRequest);
+    }
+
+    /**
      * Send OPTIONS request
      *
      * @param string $service ICAP service
@@ -251,6 +262,17 @@ class IcapClient
     }
 
     /**
+     * Send RESPMOD request with streaming support.
+     */
+    public function respmodStream(string $service, array $body = [], array $headers = []): array
+    {
+        $request = $this->getRequestIterable(IcapProtocolConstants::METHOD_RESPMOD, $service, $body, $headers);
+        $response = $this->sendIterable($request);
+
+        return $this->parseResponse($response);
+    }
+
+    /**
      * Send REQMOD request
      *
      * @param string $service ICAP service
@@ -263,6 +285,17 @@ class IcapClient
     {
         $request = $this->getRequest(IcapProtocolConstants::METHOD_REQMOD, $service, $body, $headers);
         $response = $this->send($request);
+
+        return $this->parseResponse($response);
+    }
+
+    /**
+     * Send REQMOD request with streaming support.
+     */
+    public function reqmodStream(string $service, array $body = [], array $headers = []): array
+    {
+        $request = $this->getRequestIterable(IcapProtocolConstants::METHOD_REQMOD, $service, $body, $headers);
+        $response = $this->sendIterable($request);
 
         return $this->parseResponse($response);
     }
@@ -281,6 +314,47 @@ class IcapClient
 
         $this->socketClient->write($request);
 
+        $response = $this->readResponse();
+
+        if (!$this->persistentConnection) {
+            $this->disconnect();
+        }
+
+        return $response;
+    }
+
+    /**
+     * Send a request provided as iterable chunks.
+     *
+     * @param iterable $request Iterable yielding string chunks
+     * @return string Response string
+     * @throws IcapClientException
+     */
+    public function sendIterable(iterable $request): string
+    {
+        $this->connect();
+
+        foreach ($request as $chunk) {
+            if ($chunk === '') {
+                continue;
+            }
+            $this->socketClient->write($chunk);
+        }
+
+        $response = $this->readResponse();
+
+        if (!$this->persistentConnection) {
+            $this->disconnect();
+        }
+
+        return $response;
+    }
+
+    /**
+     * Read the response from the socket.
+     */
+    private function readResponse(): string
+    {
         $response = '';
         $startTime = microtime(true);
         while (true) {
@@ -305,9 +379,6 @@ class IcapClient
             }
         }
 
-        if (!$this->persistentConnection) {
-            $this->disconnect();
-        }
         return $response;
     }
 

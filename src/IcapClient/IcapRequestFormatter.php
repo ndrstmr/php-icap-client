@@ -91,4 +91,106 @@ class IcapRequestFormatter
 
         return $result;
     }
+
+    /**
+     * Create a generator producing the request in chunks. This avoids
+     * buffering the entire body in memory. Body sections provided as
+     * {@see \Generator} or iterable will be streamed.
+     *
+     * @return \Generator<string>
+     */
+    public function formatIterable(IcapRequest $request): \Generator
+    {
+        $headers = $request->headers;
+
+        if (!array_key_exists(IcapProtocolConstants::HEADER_HOST, $headers)) {
+            $headers[IcapProtocolConstants::HEADER_HOST] = $request->host;
+        }
+        if (!array_key_exists(IcapProtocolConstants::HEADER_USER_AGENT, $headers)) {
+            $headers[IcapProtocolConstants::HEADER_USER_AGENT] = 'PHP-ICAP-CLIENT/0.5.0';
+        }
+        if (!array_key_exists(IcapProtocolConstants::HEADER_CONNECTION, $headers)) {
+            $headers[IcapProtocolConstants::HEADER_CONNECTION] = 'close';
+        }
+
+        $prefixData = '';
+        $encapsulated = [];
+        $streamSection = null;
+        $streamData = null;
+
+        foreach ($request->body as $type => $data) {
+            switch ($type) {
+                case IcapProtocolConstants::SECTION_REQ_HDR:
+                case IcapProtocolConstants::SECTION_RES_HDR:
+                    $encapsulated[$type] = strlen($prefixData);
+                    if (is_resource($data)) {
+                        $content = stream_get_contents($data);
+                        if ($content === false) {
+                            throw new Exception\IcapFileException('Unable to read body stream');
+                        }
+                    } else {
+                        $content = $data;
+                    }
+                    $prefixData .= $content;
+                    break;
+
+                case IcapProtocolConstants::SECTION_REQ_BODY:
+                case IcapProtocolConstants::SECTION_RES_BODY:
+                    $encapsulated[$type] = strlen($prefixData);
+                    $streamSection = $type;
+                    if (is_iterable($data)) {
+                        $streamData = $data;
+                    } elseif (is_resource($data)) {
+                        $streamData = (static function ($handle) {
+                            while (!feof($handle)) {
+                                $chunk = fread($handle, 8192);
+                                if ($chunk === false) {
+                                    break;
+                                }
+                                if ($chunk === '') {
+                                    continue;
+                                }
+                                yield $chunk;
+                            }
+                        })($data);
+                    } else {
+                        $streamData = [$data];
+                    }
+                    break;
+            }
+        }
+
+        if ($streamSection === null && count($encapsulated) > 0) {
+            $encapsulated[IcapProtocolConstants::SECTION_NULL_BODY] = strlen($prefixData);
+        }
+
+        if (count($encapsulated) > 0) {
+            $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] = '';
+            foreach ($encapsulated as $section => $offset) {
+                $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] .= $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] === '' ? '' : ', ';
+                $headers[IcapProtocolConstants::HEADER_ENCAPSULATED] .= "{$section}={$offset}";
+            }
+        }
+
+        $requestLine = "{$request->method} icap://{$request->host}/{$request->service} " .
+            IcapProtocolConstants::PROTOCOL_PREFIX . IcapProtocolConstants::PROTOCOL_VERSION . "\r\n";
+        $headerString = '';
+        foreach ($headers as $header => $value) {
+            $sanitizedValue = str_replace(["\r", "\n"], '', $value);
+            $headerString .= "{$header}: {$sanitizedValue}\r\n";
+        }
+
+        yield $requestLine . $headerString . "\r\n" . $prefixData;
+
+        if ($streamSection !== null && $streamData !== null) {
+            foreach ($streamData as $chunk) {
+                if ($chunk === '') {
+                    continue;
+                }
+                $len = dechex(strlen($chunk));
+                yield $len . "\r\n" . $chunk . "\r\n";
+            }
+            yield "0\r\n\r\n";
+        }
+    }
 }
