@@ -33,4 +33,22 @@ class IcapRequestFormatterTest extends TestCase
 
         $this->assertSame($expected, $result);
     }
+
+    public function testHeaderInjectionIsPrevented()
+    {
+        $request = new IcapRequest(
+            'OPTIONS',
+            'icap.test',
+            'example',
+            [
+                'X-Test' => "foo\r\nInjected: bar"
+            ]
+        );
+
+        $formatter = new IcapRequestFormatter();
+        $result = $formatter->format($request);
+
+        $this->assertStringContainsString("X-Test: fooInjected: bar\r\n", $result);
+        $this->assertStringNotContainsString("\nInjected:", $result);
+    }
 }

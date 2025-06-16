@@ -13,7 +13,7 @@ class IcapRequest
     public string $service;
     /** @var array<string,string> */
     public array $headers;
-    /** @var array<string,string> */
+    /** @var array<string,string|resource> */
     public array $body;
 
     /**
@@ -21,7 +21,7 @@ class IcapRequest
      * @param string $host    Target host
      * @param string $service Service name
      * @param array<string,string> $headers Additional headers
-     * @param array<string,string> $body    Encapsulated body sections
+     * @param array<string,string|resource> $body    Encapsulated body sections
      */
     public function __construct(string $method, string $host, string $service, array $headers = [], array $body = [])
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace IcapClient;
 
 use IcapClient\DTO\IcapRequest;
+use IcapClient\Exception\IcapFileException;
 
 /**
  * Converts {@link IcapRequest} objects into raw ICAP request strings.
@@ -35,13 +36,29 @@ class IcapRequestFormatter
                 case IcapProtocolConstants::SECTION_REQ_HDR:
                 case IcapProtocolConstants::SECTION_RES_HDR:
                     $encapsulated[$type] = strlen($bodyData);
-                    $bodyData .= $data;
+                    if (is_resource($data)) {
+                        $content = stream_get_contents($data);
+                        if ($content === false) {
+                            throw new Exception\IcapFileException('Unable to read body stream');
+                        }
+                    } else {
+                        $content = $data;
+                    }
+                    $bodyData .= $content;
                     break;
                 case IcapProtocolConstants::SECTION_REQ_BODY:
                 case IcapProtocolConstants::SECTION_RES_BODY:
+                    if (is_resource($data)) {
+                        $content = stream_get_contents($data);
+                        if ($content === false) {
+                            throw new Exception\IcapFileException('Unable to read body stream');
+                        }
+                    } else {
+                        $content = $data;
+                    }
                     $encapsulated[$type] = strlen($bodyData);
-                    $bodyData .= dechex(strlen($data)) . "\r\n";
-                    $bodyData .= $data;
+                    $bodyData .= dechex(strlen($content)) . "\r\n";
+                    $bodyData .= $content;
                     $bodyData .= "\r\n";
                     $hasBody = true;
                     break;
@@ -65,7 +82,8 @@ class IcapRequestFormatter
         $result = "{$request->method} icap://{$request->host}/{$request->service} " .
             IcapProtocolConstants::PROTOCOL_PREFIX . IcapProtocolConstants::PROTOCOL_VERSION . "\r\n";
         foreach ($headers as $header => $value) {
-            $result .= "{$header}: {$value}\r\n";
+            $sanitizedValue = str_replace(["\r", "\n"], '', $value);
+            $result .= "{$header}: {$sanitizedValue}\r\n";
         }
 
         $result .= "\r\n";

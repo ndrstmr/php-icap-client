@@ -67,4 +67,15 @@ class IcapClientTest extends TestCase
 
         $this->assertEquals($expected, $result);
     }
+
+    public function testReadFileThrowsException()
+    {
+        $client = new IcapClient('icap.test', 1344, new PhpSocketClient());
+        $ref = new ReflectionClass($client);
+        $method = $ref->getMethod('readFile');
+        $method->setAccessible(true);
+
+        $this->expectException(IcapClient\Exception\IcapFileException::class);
+        $method->invoke($client, '/does/not/exist');
+    }
 }
