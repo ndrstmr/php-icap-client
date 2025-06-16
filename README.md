@@ -49,6 +49,14 @@ $icap->respmod('example', [
 - **Socket\*** – pluggable socket layer so you can provide your own transport.
 - Data transfer objects can be found under the `DTO` namespace.
 
+## Running Tests
+
+Execute the following command to run the test suite:
+
+```
+vendor/bin/phpunit
+```
+
 ## License
 
 Released under the MIT license. See `LICENSE` for details.
