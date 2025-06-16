@@ -2,13 +2,15 @@
 
 use IcapClient\IcapClient;
 use IcapClient\Socket\PhpSocketClient;
+use IcapClient\Transport\IcapTransport;
 use PHPUnit\Framework\TestCase;
 
 class IcapClientTest extends TestCase
 {
     public function testGetRequest()
     {
-        $client = new IcapClient('icap.test', 1344, new PhpSocketClient());
+        $transport = new IcapTransport('icap.test', 1344, new PhpSocketClient());
+        $client = new IcapClient('icap.test', 1344, $transport);
         $body = [
             'res-hdr' => "HTTP/1.1 200 OK\r\nServer: Test/0.0.1\r\nContent-Type: text/html\r\n\r\n",
             'res-body' => 'This is a test.'
@@ -40,7 +42,8 @@ class IcapClientTest extends TestCase
             "\r\n" .
             "f\r\nThis is a test.\r\n0\r\n\r\n";
 
-        $client = new IcapClient('icap.test', 1344, new PhpSocketClient());
+        $transport = new IcapTransport('icap.test', 1344, new PhpSocketClient());
+        $client = new IcapClient('icap.test', 1344, $transport);
         $ref = new ReflectionClass($client);
         $method = $ref->getMethod('parseResponse');
         $method->setAccessible(true);
@@ -70,7 +73,8 @@ class IcapClientTest extends TestCase
 
     public function testReadFileThrowsException()
     {
-        $client = new IcapClient('icap.test', 1344, new PhpSocketClient());
+        $transport = new IcapTransport('icap.test', 1344, new PhpSocketClient());
+        $client = new IcapClient('icap.test', 1344, $transport);
         $ref = new ReflectionClass($client);
         $method = $ref->getMethod('readFile');
         $method->setAccessible(true);
