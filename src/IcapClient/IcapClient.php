@@ -8,6 +8,7 @@ use IcapClient\Socket\PhpSocketClient;
 use IcapClient\Exception\IcapClientException;
 use IcapClient\Exception\IcapConnectionException;
 use IcapClient\Exception\IcapResponseException;
+use IcapClient\Exception\IcapFileException;
 use IcapClient\IcapProtocolConstants;
 use IcapClient\DTO\IcapRequest;
 use IcapClient\DTO\IcapResponse;
@@ -37,6 +38,12 @@ class IcapClient
 
     /** @var string User agent string */
     private string $userAgent = 'PHP-ICAP-CLIENT/0.5.0';
+
+    /** @var bool Keep the socket connection open between requests */
+    private bool $persistentConnection = false;
+
+    /** @var bool Connection state */
+    private bool $connected = false;
 
     /**
      * Constructor
@@ -71,6 +78,10 @@ class IcapClient
      */
     private function connect(): bool
     {
+        if ($this->connected) {
+            return true;
+        }
+
         if (!$this->socketClient->connect($this->host, $this->port)) {
             $errorMessage = socket_strerror($this->socketClient->getLastError());
             throw new IcapConnectionException(
@@ -78,15 +89,17 @@ class IcapClient
             );
         }
 
+        $this->connected = true;
         return true;
     }
 
     /**
      * Close connection to ICAP server
      */
-    private function disconnect(): void
+    public function disconnect(): void
     {
         $this->socketClient->disconnect();
+        $this->connected = false;
     }
 
     /**
@@ -118,6 +131,37 @@ class IcapClient
     public function setUserAgent(string $userAgent): void
     {
         $this->userAgent = $userAgent;
+    }
+
+    /**
+     * Enable or disable persistent connections.
+     */
+    public function setPersistentConnection(bool $persistent): void
+    {
+        $this->persistentConnection = $persistent;
+    }
+
+    /**
+     * Check if persistent connections are enabled.
+     */
+    public function isPersistentConnection(): bool
+    {
+        return $this->persistentConnection;
+    }
+
+    /**
+     * Read the contents of a file and throw an exception on failure.
+     *
+     * @throws IcapFileException
+     */
+    protected function readFile(string $filename): string
+    {
+        $data = @file_get_contents($filename);
+        if ($data === false) {
+            throw new Exception\IcapFileException("Unable to read file: {$filename}");
+        }
+
+        return $data;
     }
 
     /**
@@ -204,7 +248,9 @@ class IcapClient
             $response .= $buffer;
         }
 
-        $this->disconnect();
+        if (!$this->persistentConnection) {
+            $this->disconnect();
+        }
         return $response;
     }
 
