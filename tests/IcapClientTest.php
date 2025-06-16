@@ -75,7 +75,7 @@ class IcapClientTest extends TestCase
         $method = $ref->getMethod('readFile');
         $method->setAccessible(true);
 
-        $this->expectException(IcapClient\Exception\IcapFileException::class);
-        $method->invoke($client, '/does/not/exist');
+        $this->expectException(\IcapClient\Exception\IcapFileException::class);
+        @$method->invoke($client, '/does/not/exist');
     }
 }
