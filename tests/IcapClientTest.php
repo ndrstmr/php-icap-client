@@ -1,13 +1,14 @@
 <?php
 
 use IcapClient\IcapClient;
+use IcapClient\Socket\PhpSocketClient;
 use PHPUnit\Framework\TestCase;
 
 class IcapClientTest extends TestCase
 {
     public function testGetRequest()
     {
-        $client = new IcapClient('icap.test', 1344);
+        $client = new IcapClient('icap.test', 1344, new PhpSocketClient());
         $body = [
             'res-hdr' => "HTTP/1.1 200 OK\r\nServer: Test/0.0.1\r\nContent-Type: text/html\r\n\r\n",
             'res-body' => 'This is a test.'
@@ -39,7 +40,7 @@ class IcapClientTest extends TestCase
             "\r\n" .
             "f\r\nThis is a test.\r\n0\r\n\r\n";
 
-        $client = new IcapClient('icap.test', 1344);
+        $client = new IcapClient('icap.test', 1344, new PhpSocketClient());
         $ref = new ReflectionClass($client);
         $method = $ref->getMethod('parseResponse');
         $method->setAccessible(true);
