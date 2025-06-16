@@ -12,6 +12,16 @@ class PhpSocketClient implements SocketClientInterface
 {
     private ?Socket $socket = null;
 
+    private float $readTimeout;
+
+    private float $writeTimeout;
+
+    public function __construct(float $readTimeout = 0.0, float $writeTimeout = 0.0)
+    {
+        $this->readTimeout = $readTimeout;
+        $this->writeTimeout = $writeTimeout;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -21,6 +31,25 @@ class PhpSocketClient implements SocketClientInterface
         if ($this->socket === false) {
             return false;
         }
+
+        socket_set_option(
+            $this->socket,
+            SOL_SOCKET,
+            SO_RCVTIMEO,
+            [
+                'sec' => (int) $this->readTimeout,
+                'usec' => (int) (($this->readTimeout - (int) $this->readTimeout) * 1_000_000),
+            ]
+        );
+        socket_set_option(
+            $this->socket,
+            SOL_SOCKET,
+            SO_SNDTIMEO,
+            [
+                'sec' => (int) $this->writeTimeout,
+                'usec' => (int) (($this->writeTimeout - (int) $this->writeTimeout) * 1_000_000),
+            ]
+        );
 
         if (!socket_connect($this->socket, $host, $port)) {
             $this->disconnect();
@@ -72,5 +101,47 @@ class PhpSocketClient implements SocketClientInterface
     public function getLastError(): int
     {
         return socket_last_error($this->socket);
+    }
+
+    public function setReadTimeout(float $timeout): void
+    {
+        $this->readTimeout = $timeout;
+        if ($this->socket instanceof Socket) {
+            socket_set_option(
+                $this->socket,
+                SOL_SOCKET,
+                SO_RCVTIMEO,
+                [
+                    'sec' => (int) $timeout,
+                    'usec' => (int) (($timeout - (int) $timeout) * 1_000_000),
+                ]
+            );
+        }
+    }
+
+    public function getReadTimeout(): float
+    {
+        return $this->readTimeout;
+    }
+
+    public function setWriteTimeout(float $timeout): void
+    {
+        $this->writeTimeout = $timeout;
+        if ($this->socket instanceof Socket) {
+            socket_set_option(
+                $this->socket,
+                SOL_SOCKET,
+                SO_SNDTIMEO,
+                [
+                    'sec' => (int) $timeout,
+                    'usec' => (int) (($timeout - (int) $timeout) * 1_000_000),
+                ]
+            );
+        }
+    }
+
+    public function getWriteTimeout(): float
+    {
+        return $this->writeTimeout;
     }
 }

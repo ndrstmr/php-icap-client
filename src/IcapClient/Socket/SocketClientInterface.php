@@ -32,4 +32,24 @@ interface SocketClientInterface
      * Return the last socket error code.
      */
     public function getLastError(): int;
+
+    /**
+     * Set read timeout in seconds.
+     */
+    public function setReadTimeout(float $timeout): void;
+
+    /**
+     * Get read timeout in seconds.
+     */
+    public function getReadTimeout(): float;
+
+    /**
+     * Set write timeout in seconds.
+     */
+    public function setWriteTimeout(float $timeout): void;
+
+    /**
+     * Get write timeout in seconds.
+     */
+    public function getWriteTimeout(): float;
 }
