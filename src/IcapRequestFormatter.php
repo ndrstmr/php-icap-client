@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace IcapClient;
+namespace Ndrstmr\Icap;
 
-use IcapClient\DTO\IcapRequest;
-use IcapClient\Exception\IcapFileException;
+use Ndrstmr\Icap\DTO\IcapRequest;
+use Ndrstmr\Icap\Exception\IcapFileException;
 
 /**
  * Converts {@link IcapRequest} objects into raw ICAP request strings.

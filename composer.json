@@ -1,15 +1,24 @@
 {
-    "name": "nathan242/php-icap-client",
-    "description": "Internet Content Adaptation Protocol (ICAP) client library",
+    "name": "ndrstmr/php-icap-client",
     "type": "library",
+    "description": "A modern, robust, and fully refactored ICAP client for PHP. Based on the original work by Nathan.",
+    "keywords": ["icap", "icap-client", "rfc3507", "antivirus", "content-adaptation"],
+    "homepage": "https://github.com/ndrstmr/php-icap-client",
     "license": "MIT",
     "authors": [
         {
+            "name": "ndrstmr",
+            "email": "aeaeue@ndrstmr.de",
+            "homepage": "https://github.com/ndrstmr",
+            "role": "Developer"
+        },
+        {
             "name": "Nathan Patrizi",
-            "email": "nathan.patrizi@gmail.com"
+            "email": "nathan.patrizi@gmail.com",
+            "homepage": "https://github.com/nathan242",
+            "role": "Original Author"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": ">=7.4"
     },
@@ -18,7 +27,15 @@
     },
     "autoload": {
         "psr-4": {
-            "IcapClient\\": "src/IcapClient/"
+            "Ndrstmr\\Icap\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ndrstmr\\Icap\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
     }
 }

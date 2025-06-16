@@ -1,5 +1,5 @@
 <?php
-namespace IcapClient\Exception;
+namespace Ndrstmr\Icap\Exception;
 
 /**
  * Base exception for ICAP client errors.

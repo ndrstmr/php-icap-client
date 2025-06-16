@@ -1,8 +1,9 @@
 <?php
+namespace Ndrstmr\Icap\Tests;
 
-use IcapClient\IcapClient;
-use IcapClient\Socket\SocketClientInterface;
-use IcapClient\Transport\IcapTransport;
+use Ndrstmr\Icap\IcapClient;
+use Ndrstmr\Icap\Socket\SocketClientInterface;
+use Ndrstmr\Icap\Transport\IcapTransport;
 use PHPUnit\Framework\TestCase;
 
 class FailingSocketClient implements SocketClientInterface

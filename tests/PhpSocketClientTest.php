@@ -1,6 +1,7 @@
 <?php
+namespace Ndrstmr\Icap\Tests;
 
-use IcapClient\Socket\PhpSocketClient;
+use Ndrstmr\Icap\Socket\PhpSocketClient;
 use PHPUnit\Framework\TestCase;
 
 class PhpSocketClientTest extends TestCase

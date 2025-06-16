@@ -1,8 +1,9 @@
 <?php
+namespace Ndrstmr\Icap\Tests;
 
-use IcapClient\Transport\IcapTransport;
-use IcapClient\Socket\SocketClientInterface;
-use IcapClient\Exception\IcapTimeoutException;
+use Ndrstmr\Icap\Transport\IcapTransport;
+use Ndrstmr\Icap\Socket\SocketClientInterface;
+use Ndrstmr\Icap\Exception\IcapTimeoutException;
 use PHPUnit\Framework\TestCase;
 
 class StreamingSocketClient implements SocketClientInterface

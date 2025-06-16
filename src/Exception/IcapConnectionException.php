@@ -1,5 +1,5 @@
 <?php
-namespace IcapClient\Exception;
+namespace Ndrstmr\Icap\Exception;
 
 /**
  * Thrown when a connection to the ICAP server fails.

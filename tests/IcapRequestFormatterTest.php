@@ -1,7 +1,8 @@
 <?php
+namespace Ndrstmr\Icap\Tests;
 
-use IcapClient\DTO\IcapRequest;
-use IcapClient\IcapRequestFormatter;
+use Ndrstmr\Icap\DTO\IcapRequest;
+use Ndrstmr\Icap\IcapRequestFormatter;
 use PHPUnit\Framework\TestCase;
 
 class IcapRequestFormatterTest extends TestCase
