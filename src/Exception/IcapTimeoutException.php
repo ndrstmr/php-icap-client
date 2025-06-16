@@ -1,5 +1,5 @@
 <?php
-namespace IcapClient\Exception;
+namespace Ndrstmr\Icap\Exception;
 
 /**
  * Thrown when the read operation exceeds the configured timeout.

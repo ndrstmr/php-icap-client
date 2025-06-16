@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace IcapClient;
+namespace Ndrstmr\Icap;
 
-use IcapClient\DTO\IcapResponse;
-use IcapClient\Exception\IcapParseException;
+use Ndrstmr\Icap\DTO\IcapResponse;
+use Ndrstmr\Icap\Exception\IcapParseException;
 
 /**
  * Parse raw ICAP responses into a structured representation.

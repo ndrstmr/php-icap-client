@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace IcapClient\DTO;
+namespace Ndrstmr\Icap\DTO;
 
 /**
  * Data transfer object describing an ICAP response.

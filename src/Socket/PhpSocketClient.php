@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace IcapClient\Socket;
+namespace Ndrstmr\Icap\Socket;
 
 use Socket;
 

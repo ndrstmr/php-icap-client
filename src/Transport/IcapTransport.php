@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace IcapClient\Transport;
+namespace Ndrstmr\Icap\Transport;
 
-use IcapClient\Exception\IcapClientException;
-use IcapClient\Exception\IcapConnectionException;
-use IcapClient\Exception\IcapTimeoutException;
-use IcapClient\Socket\PhpSocketClient;
-use IcapClient\Socket\SocketClientInterface;
+use Ndrstmr\Icap\Exception\IcapClientException;
+use Ndrstmr\Icap\Exception\IcapConnectionException;
+use Ndrstmr\Icap\Exception\IcapTimeoutException;
+use Ndrstmr\Icap\Socket\PhpSocketClient;
+use Ndrstmr\Icap\Socket\SocketClientInterface;
 
 /**
  * Default transport implementation using {@link SocketClientInterface}.

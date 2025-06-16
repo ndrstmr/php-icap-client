@@ -1,8 +1,9 @@
 <?php
+namespace Ndrstmr\Icap\Tests;
 
-use IcapClient\IcapClient;
-use IcapClient\Socket\PhpSocketClient;
-use IcapClient\Transport\IcapTransport;
+use Ndrstmr\Icap\IcapClient;
+use Ndrstmr\Icap\Socket\PhpSocketClient;
+use Ndrstmr\Icap\Transport\IcapTransport;
 use PHPUnit\Framework\TestCase;
 
 class IcapClientTest extends TestCase

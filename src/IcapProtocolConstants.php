@@ -1,5 +1,5 @@
 <?php
-namespace IcapClient;
+namespace Ndrstmr\Icap;
 
 /**
  * Defines constants related to the ICAP protocol.

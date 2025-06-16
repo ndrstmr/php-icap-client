@@ -1,6 +1,7 @@
 <?php
+namespace Ndrstmr\Icap\Tests;
 
-use IcapClient\IcapResponseParser;
+use Ndrstmr\Icap\IcapResponseParser;
 use PHPUnit\Framework\TestCase;
 
 class IcapResponseParserTest extends TestCase

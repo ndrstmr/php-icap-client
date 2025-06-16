@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace IcapClient;
+namespace Ndrstmr\Icap;
 
-use IcapClient\Exception\IcapClientException;
-use IcapClient\Exception\IcapResponseException;
-use IcapClient\Exception\IcapFileException;
-use IcapClient\Transport\TransportInterface;
-use IcapClient\Transport\IcapTransport;
-use IcapClient\IcapProtocolConstants;
-use IcapClient\DTO\IcapRequest;
-use IcapClient\DTO\IcapResponse;
-use IcapClient\IcapRequestFormatter;
-use IcapClient\IcapResponseParser;
+use Ndrstmr\Icap\Exception\IcapClientException;
+use Ndrstmr\Icap\Exception\IcapResponseException;
+use Ndrstmr\Icap\Exception\IcapFileException;
+use Ndrstmr\Icap\Transport\TransportInterface;
+use Ndrstmr\Icap\Transport\IcapTransport;
+use Ndrstmr\Icap\IcapProtocolConstants;
+use Ndrstmr\Icap\DTO\IcapRequest;
+use Ndrstmr\Icap\DTO\IcapResponse;
+use Ndrstmr\Icap\IcapRequestFormatter;
+use Ndrstmr\Icap\IcapResponseParser;
 
 /**
  * High level ICAP client handling request formatting and socket communication.
