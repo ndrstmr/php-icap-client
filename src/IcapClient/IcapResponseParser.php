@@ -6,8 +6,16 @@ namespace IcapClient;
 use IcapClient\DTO\IcapResponse;
 use IcapClient\Exception\IcapResponseException;
 
+/**
+ * Parse raw ICAP responses into a structured representation.
+ */
 class IcapResponseParser
 {
+    /**
+     * Parse the given response string.
+     *
+     * @throws IcapResponseException If the response does not contain valid ICAP data
+     */
     public function parse(string $response): IcapResponse
     {
         $result = new IcapResponse();

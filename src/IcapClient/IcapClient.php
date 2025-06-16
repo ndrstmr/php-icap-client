@@ -14,6 +14,9 @@ use IcapClient\DTO\IcapResponse;
 use IcapClient\IcapRequestFormatter;
 use IcapClient\IcapResponseParser;
 
+/**
+ * High level ICAP client handling request formatting and socket communication.
+ */
 class IcapClient
 {
 

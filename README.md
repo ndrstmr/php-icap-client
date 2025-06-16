@@ -78,3 +78,14 @@ This is a test.
 )
 ```
 
+### Architecture overview
+
+The library is organised into small components:
+
+* **IcapClient** – high-level API combining the formatter, parser and socket implementation.
+* **IcapRequestFormatter** – turns request objects into raw ICAP strings.
+* **IcapResponseParser** – parses server responses into structured objects.
+* **Socket\*** – pluggable socket layer used by `IcapClient` to communicate with the server.
+
+Data transfer objects under `DTO` hold the request and response data structures.
+
