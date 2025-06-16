@@ -38,7 +38,7 @@ class IcapResponseParserTest extends TestCase
                 'res-hdr' => "HTTP/1.1 200 OK\r\ncontent-type: text/html\r\nserver: Test/0.0.1",
                 'res-body' => 'This is a test.',
             ],
-            'rawBody' => "HTTP/1.1 200 OK\r\ncontent-type: text/html\r\nserver: Test/0.0.1\r\nf\r\nThis is a test.\r\n0\r\n\r\n",
+            'rawBody' => "HTTP/1.1 200 OK\r\ncontent-type: text/html\r\nserver: Test/0.0.1\r\n\r\nf\r\nThis is a test.\r\n0\r\n\r\n",
         ];
 
         $this->assertEquals($expected, [

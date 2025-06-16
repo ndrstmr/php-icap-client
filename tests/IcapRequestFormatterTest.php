@@ -97,16 +97,17 @@ class IcapRequestFormatterTest extends TestCase
 
         $formatter = new IcapRequestFormatter();
 
-        $expected = $formatter->format(new IcapRequest(
-            'RESPMOD',
-            'icap.test',
-            'example',
-            [],
-            [
-                'res-hdr' => "HTTP/1.1 200 OK\r\nServer: Test/0.0.1\r\nContent-Type: text/html\r\n\r\n",
-                'res-body' => 'This is a test.'
-            ]
-        ));
+        $expected = "RESPMOD icap://icap.test/example ICAP/1.0\r\n" .
+            "Host: icap.test\r\n" .
+            "User-Agent: PHP-ICAP-CLIENT/0.5.0\r\n" .
+            "Connection: close\r\n" .
+            "Encapsulated: res-hdr=0, res-body=64\r\n" .
+            "\r\n" .
+            "HTTP/1.1 200 OK\r\n" .
+            "Server: Test/0.0.1\r\n" .
+            "Content-Type: text/html\r\n" .
+            "\r\n" .
+            "5\r\nThis \r\n3\r\nis \r\n2\r\na \r\n5\r\ntest.\r\n0\r\n\r\n";
 
         $result = '';
         foreach ($formatter->formatIterable($request) as $chunk) {

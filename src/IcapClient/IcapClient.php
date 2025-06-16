@@ -194,7 +194,7 @@ class IcapClient
      */
     protected function readFile(string $filename): string
     {
-        $data = @file_get_contents($filename);
+        $data = file_get_contents($filename);
         if ($data === false) {
             throw new Exception\IcapFileException("Unable to read file: {$filename}");
         }

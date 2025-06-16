@@ -37,7 +37,7 @@ class IcapClientErrorHandlingTest extends TestCase
     public function testConnectionFailureThrowsException()
     {
         $client = new IcapClient('icap.test', 1344, new FailingSocketClient());
-        $this->expectException(IcapClient\Exception\IcapConnectionException::class);
+        $this->expectException(\IcapClient\Exception\IcapConnectionException::class);
         $client->options('example');
     }
 
@@ -45,7 +45,7 @@ class IcapClientErrorHandlingTest extends TestCase
     {
         $socket = new InvalidResponseSocketClient(['BAD DATA', '']);
         $client = new IcapClient('icap.test', 1344, $socket);
-        $this->expectException(IcapClient\Exception\IcapResponseException::class);
+        $this->expectException(\IcapClient\Exception\IcapResponseException::class);
         $client->options('example');
     }
 }
