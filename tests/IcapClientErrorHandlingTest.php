@@ -33,6 +33,23 @@ class InvalidResponseSocketClient implements SocketClientInterface
     public function getWriteTimeout(): float { return 0.0; }
 }
 
+class TimeoutSocketClient implements SocketClientInterface
+{
+    private float $readTimeout = 0.0;
+    public function connect(string $host, int $port): bool { return true; }
+    public function write(string $data): int { return strlen($data); }
+    public function read(int $length): string {
+        usleep((int)(($this->readTimeout + 0.05) * 1_000_000));
+        return 'a';
+    }
+    public function disconnect(): void {}
+    public function getLastError(): int { return 0; }
+    public function setReadTimeout(float $timeout): void { $this->readTimeout = $timeout; }
+    public function getReadTimeout(): float { return $this->readTimeout; }
+    public function setWriteTimeout(float $timeout): void {}
+    public function getWriteTimeout(): float { return 0.0; }
+}
+
 class IcapClientErrorHandlingTest extends TestCase
 {
     public function testConnectionFailureThrowsException()
@@ -48,7 +65,17 @@ class IcapClientErrorHandlingTest extends TestCase
         $socket = new InvalidResponseSocketClient(['BAD DATA', '']);
         $transport = new IcapTransport('icap.test', 1344, $socket);
         $client = new IcapClient('icap.test', 1344, $transport);
-        $this->expectException(\IcapClient\Exception\IcapResponseException::class);
+        $this->expectException(\IcapClient\Exception\IcapParseException::class);
+        $client->options('example');
+    }
+
+    public function testReadTimeoutThrowsException()
+    {
+        $socket = new TimeoutSocketClient();
+        $transport = new IcapTransport('icap.test', 1344, $socket);
+        $transport->setReadTimeout(0.1);
+        $client = new IcapClient('icap.test', 1344, $transport);
+        $this->expectException(\IcapClient\Exception\IcapTimeoutException::class);
         $client->options('example');
     }
 }
