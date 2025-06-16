@@ -52,4 +52,12 @@ interface SocketClientInterface
      * Get write timeout in seconds.
      */
     public function getWriteTimeout(): float;
+
+    /**
+     * Block until data is available to read or the timeout elapses.
+     *
+     * @param float $timeout Timeout in seconds
+     * @return bool True if data is ready, false on timeout or error
+     */
+    public function waitForData(float $timeout): bool;
 }

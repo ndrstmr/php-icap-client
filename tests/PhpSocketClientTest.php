@@ -47,4 +47,31 @@ class PhpSocketClientTest extends TestCase
         $client->setWriteTimeout(4.0);
         $this->assertSame(4.0, $client->getWriteTimeout());
     }
+
+    public function testWaitForData()
+    {
+        if (!function_exists('socket_create')) {
+            $this->markTestSkipped('Sockets extension not available');
+        }
+
+        $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        socket_bind($server, '127.0.0.1', 0);
+        socket_getsockname($server, $address, $port);
+        socket_listen($server, 1);
+
+        $client = new PhpSocketClient();
+        $this->assertTrue($client->connect($address, $port));
+
+        $peer = socket_accept($server);
+
+        $this->assertFalse($client->waitForData(0.1));
+
+        socket_write($peer, 'abc');
+        $this->assertTrue($client->waitForData(0.1));
+        $this->assertSame('abc', $client->read(3));
+
+        $client->disconnect();
+        socket_close($peer);
+        socket_close($server);
+    }
 }
