@@ -144,4 +144,21 @@ class PhpSocketClient implements SocketClientInterface
     {
         return $this->writeTimeout;
     }
+
+    public function waitForData(float $timeout): bool
+    {
+        if (!$this->socket instanceof Socket) {
+            return false;
+        }
+
+        $read = [$this->socket];
+        $sec = (int) $timeout;
+        $usec = (int) (($timeout - $sec) * 1_000_000);
+        $result = @socket_select($read, $write = null, $except = null, $sec, $usec);
+        if ($result === false) {
+            return false;
+        }
+
+        return $result > 0;
+    }
 }

@@ -127,8 +127,11 @@ class IcapTransport implements TransportInterface
     private function readResponse(): string
     {
         $response = '';
-        $startTime = microtime(true);
         while (true) {
+            if (!$this->socketClient->waitForData($this->readTimeout)) {
+                throw new IcapTimeoutException('Read timeout exceeded');
+            }
+
             $buffer = $this->socketClient->read(2048);
 
             if ($buffer === '') {
@@ -143,10 +146,6 @@ class IcapTransport implements TransportInterface
 
             if (strlen($response) > $this->maxResponseSize) {
                 throw new IcapClientException('Maximum response size exceeded');
-            }
-
-            if ((microtime(true) - $startTime) > $this->readTimeout) {
-                throw new IcapTimeoutException('Read timeout exceeded');
             }
         }
 

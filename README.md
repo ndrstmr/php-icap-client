@@ -46,8 +46,17 @@ $icap->respmod('example', [
 - **IcapClient** – high-level API that uses the formatter, parser and socket implementation.
 - **IcapRequestFormatter** – turns request objects into raw ICAP strings.
 - **IcapResponseParser** – parses server responses into structured objects.
-- **Socket\*** – pluggable socket layer so you can provide your own transport.
+- **Socket\*** – pluggable socket layer so you can provide your own transport. The
+  socket interface exposes a `waitForData()` method used to efficiently wait for
+  incoming bytes.
 - Data transfer objects can be found under the `DTO` namespace.
+
+### Timeout Handling
+
+The transport resets the read timer every time data is received. Large responses
+therefore do not trigger a timeout as long as more bytes keep arriving. If no
+data becomes available within the configured timeout, an
+`IcapTimeoutException` is thrown.
 
 ## Running Tests
 
