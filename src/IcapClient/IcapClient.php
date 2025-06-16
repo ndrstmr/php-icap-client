@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace IcapClient;
 
 use Socket;
+use IcapClient\Socket\SocketClientInterface;
+use IcapClient\Socket\PhpSocketClient;
 use IcapClient\Exception\IcapClientException;
 use IcapClient\Exception\IcapConnectionException;
 use IcapClient\Exception\IcapResponseException;
@@ -18,8 +20,8 @@ class IcapClient
     /** @var int Port number */
     private int $port;
 
-    /** @var ?Socket Socket object */
-    private ?Socket $socket = null;
+    /** @var SocketClientInterface Socket client implementation */
+    private SocketClientInterface $socketClient;
 
     /** @var string User agent string */
     private string $userAgent = 'PHP-ICAP-CLIENT/0.5.0';
@@ -30,10 +32,11 @@ class IcapClient
      * @param string $host IP address of ICAP server
      * @param int $port Port number
      */
-    public function __construct(string $host, int $port)
+    public function __construct(string $host, int $port, SocketClientInterface $socketClient = null)
     {
         $this->host = $host;
         $this->port = $port;
+        $this->socketClient = $socketClient ?? new PhpSocketClient();
     }
 
     /**
@@ -48,16 +51,8 @@ class IcapClient
      */
     private function connect(): bool
     {
-        $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if ($this->socket === false) {
-            throw new IcapConnectionException('Failed to create socket.');
-        }
-
-        if (!socket_connect($this->socket, $this->host, $this->port)) {
-            // Get detailed error message for better diagnostics
-            $errorMessage = socket_strerror(socket_last_error($this->socket));
-            socket_close($this->socket);
-            $this->socket = null;
+        if (!$this->socketClient->connect($this->host, $this->port)) {
+            $errorMessage = socket_strerror($this->socketClient->getLastError());
             throw new IcapConnectionException(
                 "Cannot connect to icap://{$this->host}:{$this->port} (Socket error: {$errorMessage})"
             );
@@ -71,11 +66,7 @@ class IcapClient
      */
     private function disconnect(): void
     {
-        if ($this->socket instanceof Socket) { // Check if socket is valid before shutdown/close 
-            socket_shutdown($this->socket);
-            socket_close($this->socket);
-        }
-        $this->socket = null; // Reset socket property 
+        $this->socketClient->disconnect();
     }
 
     /**
@@ -85,7 +76,7 @@ class IcapClient
      */
     public function getLastSocketError(): int
     {
-        return socket_last_error($this->socket);
+        return $this->socketClient->getLastError();
     }
 
     /**
@@ -240,10 +231,10 @@ class IcapClient
         // connect() now throws a specific connection exception with more detail
         $this->connect();
 
-        socket_write($this->socket, $request);
+        $this->socketClient->write($request);
 
         $response = '';
-        while ($buffer = socket_read($this->socket, 2048)) {
+        while ($buffer = $this->socketClient->read(2048)) {
             $response .= $buffer;
         }
 

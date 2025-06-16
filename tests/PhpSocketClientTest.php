@@ -1,0 +1,37 @@
+<?php
+
+use IcapClient\Socket\PhpSocketClient;
+use PHPUnit\Framework\TestCase;
+
+class PhpSocketClientTest extends TestCase
+{
+    public function testConnectWriteReadDisconnect()
+    {
+        if (!function_exists('socket_create')) {
+            $this->markTestSkipped('Sockets extension not available');
+        }
+
+        // create server socket
+        $server = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        socket_bind($server, '127.0.0.1', 0);
+        socket_getsockname($server, $address, $port);
+        socket_listen($server, 1);
+
+        $client = new PhpSocketClient();
+        $this->assertTrue($client->connect($address, $port));
+
+        $peer = socket_accept($server);
+
+        $client->write('hello');
+        $this->assertSame('hello', socket_read($peer, 5));
+
+        socket_write($peer, 'world');
+        $this->assertSame('world', $client->read(5));
+
+        $client->disconnect();
+        socket_close($peer);
+        socket_close($server);
+
+        $this->assertIsInt($client->getLastError());
+    }
+}
