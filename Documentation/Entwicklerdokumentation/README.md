@@ -17,7 +17,7 @@ Eine robuste, moderne und testbare PHP-Implementierung eines ICAP-Clients. Diese
 Die Quellen liegen unter `src`, die Tests unter `tests`.
 
 ```
-src/IcapClient/       # Bibliothekscode
+src/                 # Bibliothekscode
     DTO/             # Datenobjekte
     Exception/       # Fehlertypen
     Socket/          # Socket-Implementierungen
@@ -25,7 +25,7 @@ src/IcapClient/       # Bibliothekscode
 ``` 
 
 PSR‑4-Autoloading ist in der `composer.json` hinterlegt:
-`"IcapClient\\": "src/IcapClient/"`
+`"Ndrstmr\\Icap\\": "src/"`
 
 ### Code-Konventionen
 Der Code folgt dem PSR‑12‑Standard.
