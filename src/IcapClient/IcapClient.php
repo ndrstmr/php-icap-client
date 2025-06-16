@@ -45,6 +45,12 @@ class IcapClient
     /** @var bool Connection state */
     private bool $connected = false;
 
+    /** @var int Maximum number of bytes to read before aborting */
+    private int $maxResponseSize = 10485760; // 10 MiB default
+
+    /** @var float Maximum seconds to wait for a response */
+    private float $readTimeout = 5.0;
+
     /**
      * Constructor
      *
@@ -150,6 +156,38 @@ class IcapClient
     }
 
     /**
+     * Set maximum allowed response size in bytes.
+     */
+    public function setMaxResponseSize(int $maxSize): void
+    {
+        $this->maxResponseSize = $maxSize;
+    }
+
+    /**
+     * Get maximum allowed response size.
+     */
+    public function getMaxResponseSize(): int
+    {
+        return $this->maxResponseSize;
+    }
+
+    /**
+     * Set read timeout in seconds.
+     */
+    public function setReadTimeout(float $timeout): void
+    {
+        $this->readTimeout = $timeout;
+    }
+
+    /**
+     * Get read timeout in seconds.
+     */
+    public function getReadTimeout(): float
+    {
+        return $this->readTimeout;
+    }
+
+    /**
      * Read the contents of a file and throw an exception on failure.
      *
      * @throws IcapFileException
@@ -244,8 +282,27 @@ class IcapClient
         $this->socketClient->write($request);
 
         $response = '';
-        while ($buffer = $this->socketClient->read(2048)) {
+        $startTime = microtime(true);
+        while (true) {
+            $buffer = $this->socketClient->read(2048);
+
+            if ($buffer === '') {
+                if ($this->socketClient->getLastError() !== 0) {
+                    $error = socket_strerror($this->socketClient->getLastError());
+                    throw new IcapClientException("Socket read error: {$error}");
+                }
+                break;
+            }
+
             $response .= $buffer;
+
+            if (strlen($response) > $this->maxResponseSize) {
+                throw new IcapClientException('Maximum response size exceeded');
+            }
+
+            if ((microtime(true) - $startTime) > $this->readTimeout) {
+                throw new IcapClientException('Read timeout exceeded');
+            }
         }
 
         if (!$this->persistentConnection) {
