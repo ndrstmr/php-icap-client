@@ -51,4 +51,68 @@ class IcapRequestFormatterTest extends TestCase
         $this->assertStringContainsString("X-Test: fooInjected: bar\r\n", $result);
         $this->assertStringNotContainsString("\nInjected:", $result);
     }
+
+    public function testFormatIterableMatchesFormat()
+    {
+        $request = new IcapRequest(
+            'RESPMOD',
+            'icap.test',
+            'example',
+            [],
+            [
+                'res-hdr' => "HTTP/1.1 200 OK\r\nServer: Test/0.0.1\r\nContent-Type: text/html\r\n\r\n",
+                'res-body' => 'This is a test.'
+            ]
+        );
+
+        $formatter = new IcapRequestFormatter();
+        $expected = $formatter->format($request);
+        $result = '';
+        foreach ($formatter->formatIterable($request) as $chunk) {
+            $result .= $chunk;
+        }
+
+        $this->assertSame($expected, $result);
+    }
+
+    public function testStreamingBodyGenerator()
+    {
+        $generator = static function () {
+            yield 'This ';
+            yield 'is ';
+            yield 'a ';
+            yield 'test.';
+        };
+
+        $request = new IcapRequest(
+            'RESPMOD',
+            'icap.test',
+            'example',
+            [],
+            [
+                'res-hdr' => "HTTP/1.1 200 OK\r\nServer: Test/0.0.1\r\nContent-Type: text/html\r\n\r\n",
+                'res-body' => $generator(),
+            ]
+        );
+
+        $formatter = new IcapRequestFormatter();
+
+        $expected = $formatter->format(new IcapRequest(
+            'RESPMOD',
+            'icap.test',
+            'example',
+            [],
+            [
+                'res-hdr' => "HTTP/1.1 200 OK\r\nServer: Test/0.0.1\r\nContent-Type: text/html\r\n\r\n",
+                'res-body' => 'This is a test.'
+            ]
+        ));
+
+        $result = '';
+        foreach ($formatter->formatIterable($request) as $chunk) {
+            $result .= $chunk;
+        }
+
+        $this->assertSame($expected, $result);
+    }
 }
