@@ -5,10 +5,16 @@ namespace IcapClient\Socket;
 
 use Socket;
 
+/**
+ * Socket implementation using PHP's socket extension.
+ */
 class PhpSocketClient implements SocketClientInterface
 {
     private ?Socket $socket = null;
 
+    /**
+     * {@inheritdoc}
+     */
     public function connect(string $host, int $port): bool
     {
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -24,6 +30,9 @@ class PhpSocketClient implements SocketClientInterface
         return true;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function write(string $data): int
     {
         if (!$this->socket instanceof Socket) {
@@ -33,6 +42,9 @@ class PhpSocketClient implements SocketClientInterface
         return socket_write($this->socket, $data);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function read(int $length): string
     {
         if (!$this->socket instanceof Socket) {
@@ -42,6 +54,9 @@ class PhpSocketClient implements SocketClientInterface
         return socket_read($this->socket, $length);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function disconnect(): void
     {
         if ($this->socket instanceof Socket) {
@@ -51,6 +66,9 @@ class PhpSocketClient implements SocketClientInterface
         $this->socket = null;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getLastError(): int
     {
         return socket_last_error($this->socket);

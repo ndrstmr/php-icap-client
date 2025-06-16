@@ -5,8 +5,14 @@ namespace IcapClient;
 
 use IcapClient\DTO\IcapRequest;
 
+/**
+ * Converts {@link IcapRequest} objects into raw ICAP request strings.
+ */
 class IcapRequestFormatter
 {
+    /**
+     * Create a raw request string from the provided request data.
+     */
     public function format(IcapRequest $request): string
     {
         $headers = $request->headers;

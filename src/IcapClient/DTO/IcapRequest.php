@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace IcapClient\DTO;
 
+/**
+ * Data transfer object describing an ICAP request.
+ */
 class IcapRequest
 {
     public string $method;
@@ -13,6 +16,13 @@ class IcapRequest
     /** @var array<string,string> */
     public array $body;
 
+    /**
+     * @param string $method  ICAP method name
+     * @param string $host    Target host
+     * @param string $service Service name
+     * @param array<string,string> $headers Additional headers
+     * @param array<string,string> $body    Encapsulated body sections
+     */
     public function __construct(string $method, string $host, string $service, array $headers = [], array $body = [])
     {
         $this->method = $method;
