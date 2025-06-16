@@ -5,6 +5,7 @@ namespace IcapClient\Transport;
 
 use IcapClient\Exception\IcapClientException;
 use IcapClient\Exception\IcapConnectionException;
+use IcapClient\Exception\IcapTimeoutException;
 use IcapClient\Socket\PhpSocketClient;
 use IcapClient\Socket\SocketClientInterface;
 
@@ -145,7 +146,7 @@ class IcapTransport implements TransportInterface
             }
 
             if ((microtime(true) - $startTime) > $this->readTimeout) {
-                throw new IcapClientException('Read timeout exceeded');
+                throw new IcapTimeoutException('Read timeout exceeded');
             }
         }
 

@@ -48,4 +48,11 @@ class IcapResponseParserTest extends TestCase
             'rawBody' => $result->rawBody,
         ]);
     }
+
+    public function testInvalidResponseThrowsException()
+    {
+        $parser = new IcapResponseParser();
+        $this->expectException(\IcapClient\Exception\IcapParseException::class);
+        $parser->parse('BAD');
+    }
 }

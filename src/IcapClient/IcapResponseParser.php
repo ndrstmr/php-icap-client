@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace IcapClient;
 
 use IcapClient\DTO\IcapResponse;
-use IcapClient\Exception\IcapResponseException;
+use IcapClient\Exception\IcapParseException;
 
 /**
  * Parse raw ICAP responses into a structured representation.
@@ -14,7 +14,7 @@ class IcapResponseParser
     /**
      * Parse the given response string.
      *
-     * @throws IcapResponseException If the response does not contain valid ICAP data
+     * @throws IcapParseException If the response does not contain valid ICAP data
      */
     public function parse(string $response): IcapResponse
     {
@@ -23,7 +23,7 @@ class IcapResponseParser
         foreach (preg_split('/\r?\n/', $response) as $line) {
             if ([] === $result->protocol) {
                 if (0 !== strpos($line, IcapProtocolConstants::PROTOCOL_PREFIX)) {
-                    throw new IcapResponseException('Unknown ICAP response');
+                    throw new IcapParseException('Unknown ICAP response');
                 }
                 $parts = preg_split('/\ +/', $line, 3);
                 $result->protocol = [
