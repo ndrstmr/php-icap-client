@@ -2,6 +2,7 @@
 
 use IcapClient\IcapClient;
 use IcapClient\Socket\SocketClientInterface;
+use IcapClient\Transport\IcapTransport;
 use PHPUnit\Framework\TestCase;
 
 class FailingSocketClient implements SocketClientInterface
@@ -36,7 +37,8 @@ class IcapClientErrorHandlingTest extends TestCase
 {
     public function testConnectionFailureThrowsException()
     {
-        $client = new IcapClient('icap.test', 1344, new FailingSocketClient());
+        $transport = new IcapTransport('icap.test', 1344, new FailingSocketClient());
+        $client = new IcapClient('icap.test', 1344, $transport);
         $this->expectException(\IcapClient\Exception\IcapConnectionException::class);
         $client->options('example');
     }
@@ -44,7 +46,8 @@ class IcapClientErrorHandlingTest extends TestCase
     public function testInvalidResponseThrowsException()
     {
         $socket = new InvalidResponseSocketClient(['BAD DATA', '']);
-        $client = new IcapClient('icap.test', 1344, $socket);
+        $transport = new IcapTransport('icap.test', 1344, $socket);
+        $client = new IcapClient('icap.test', 1344, $transport);
         $this->expectException(\IcapClient\Exception\IcapResponseException::class);
         $client->options('example');
     }

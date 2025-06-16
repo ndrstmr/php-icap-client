@@ -3,12 +3,11 @@ declare(strict_types=1);
 
 namespace IcapClient;
 
-use IcapClient\Socket\SocketClientInterface;
-use IcapClient\Socket\PhpSocketClient;
 use IcapClient\Exception\IcapClientException;
-use IcapClient\Exception\IcapConnectionException;
 use IcapClient\Exception\IcapResponseException;
 use IcapClient\Exception\IcapFileException;
+use IcapClient\Transport\TransportInterface;
+use IcapClient\Transport\IcapTransport;
 use IcapClient\IcapProtocolConstants;
 use IcapClient\DTO\IcapRequest;
 use IcapClient\DTO\IcapResponse;
@@ -24,11 +23,8 @@ class IcapClient
     /** @var string Address of ICAP server */
     private string $host;
 
-    /** @var int Port number */
-    private int $port;
-
-    /** @var SocketClientInterface Socket client implementation */
-    private SocketClientInterface $socketClient;
+    /** @var TransportInterface Transport implementation */
+    private TransportInterface $transport;
 
     /** @var IcapRequestFormatter */
     private IcapRequestFormatter $requestFormatter;
@@ -39,17 +35,6 @@ class IcapClient
     /** @var string User agent string */
     private string $userAgent = 'PHP-ICAP-CLIENT/0.5.0';
 
-    /** @var bool Keep the socket connection open between requests */
-    private bool $persistentConnection = false;
-
-    /** @var bool Connection state */
-    private bool $connected = false;
-
-    /** @var int Maximum number of bytes to read before aborting */
-    private int $maxResponseSize = 10485760; // 10 MiB default
-
-    /** @var float Maximum seconds to wait for a response */
-    private float $readTimeout = 5.0;
 
     /**
      * Constructor
@@ -60,52 +45,22 @@ class IcapClient
     public function __construct(
         string $host,
         int $port,
-        SocketClientInterface $socketClient = null,
+        TransportInterface $transport = null,
         IcapRequestFormatter $requestFormatter = null,
         IcapResponseParser $responseParser = null
     )
     {
         $this->host = $host;
-        $this->port = $port;
-        $this->socketClient = $socketClient ?? new PhpSocketClient();
+        $this->transport = $transport ?? new IcapTransport($host, $port, new \IcapClient\Socket\PhpSocketClient());
         $this->requestFormatter = $requestFormatter ?? new IcapRequestFormatter();
         $this->responseParser = $responseParser ?? new IcapResponseParser();
     }
-
-    /**
-     * Establish a socket connection to the configured ICAP server.
-     *
-     * The socket is closed and reset if the connection attempt fails and a
-     * {@see IcapConnectionException} is thrown.
-     *
-     * @return bool True on success
-     * @throws IcapConnectionException If the socket cannot be created or the
-     *     connection fails
-     */
-    private function connect(): bool
-    {
-        if ($this->connected) {
-            return true;
-        }
-
-        if (!$this->socketClient->connect($this->host, $this->port)) {
-            $errorMessage = socket_strerror($this->socketClient->getLastError());
-            throw new IcapConnectionException(
-                "Cannot connect to icap://{$this->host}:{$this->port} (Socket error: {$errorMessage})"
-            );
-        }
-
-        $this->connected = true;
-        return true;
-    }
-
     /**
      * Close connection to ICAP server
      */
     public function disconnect(): void
     {
-        $this->socketClient->disconnect();
-        $this->connected = false;
+        $this->transport->disconnect();
     }
 
     /**
@@ -115,7 +70,7 @@ class IcapClient
      */
     public function getLastSocketError(): int
     {
-        return $this->socketClient->getLastError();
+        return $this->transport->getLastSocketError();
     }
 
     /**
@@ -144,7 +99,7 @@ class IcapClient
      */
     public function setPersistentConnection(bool $persistent): void
     {
-        $this->persistentConnection = $persistent;
+        $this->transport->setPersistentConnection($persistent);
     }
 
     /**
@@ -152,7 +107,7 @@ class IcapClient
      */
     public function isPersistentConnection(): bool
     {
-        return $this->persistentConnection;
+        return $this->transport->isPersistentConnection();
     }
 
     /**
@@ -160,7 +115,7 @@ class IcapClient
      */
     public function setMaxResponseSize(int $maxSize): void
     {
-        $this->maxResponseSize = $maxSize;
+        $this->transport->setMaxResponseSize($maxSize);
     }
 
     /**
@@ -168,7 +123,7 @@ class IcapClient
      */
     public function getMaxResponseSize(): int
     {
-        return $this->maxResponseSize;
+        return $this->transport->getMaxResponseSize();
     }
 
     /**
@@ -176,7 +131,7 @@ class IcapClient
      */
     public function setReadTimeout(float $timeout): void
     {
-        $this->readTimeout = $timeout;
+        $this->transport->setReadTimeout($timeout);
     }
 
     /**
@@ -184,7 +139,7 @@ class IcapClient
      */
     public function getReadTimeout(): float
     {
-        return $this->readTimeout;
+        return $this->transport->getReadTimeout();
     }
 
     /**
@@ -309,18 +264,7 @@ class IcapClient
      */
     public function send(string $request): string
     {
-        // connect() now throws a specific connection exception with more detail
-        $this->connect();
-
-        $this->socketClient->write($request);
-
-        $response = $this->readResponse();
-
-        if (!$this->persistentConnection) {
-            $this->disconnect();
-        }
-
-        return $response;
+        return $this->transport->send($request);
     }
 
     /**
@@ -332,54 +276,7 @@ class IcapClient
      */
     public function sendIterable(iterable $request): string
     {
-        $this->connect();
-
-        foreach ($request as $chunk) {
-            if ($chunk === '') {
-                continue;
-            }
-            $this->socketClient->write($chunk);
-        }
-
-        $response = $this->readResponse();
-
-        if (!$this->persistentConnection) {
-            $this->disconnect();
-        }
-
-        return $response;
-    }
-
-    /**
-     * Read the response from the socket.
-     */
-    private function readResponse(): string
-    {
-        $response = '';
-        $startTime = microtime(true);
-        while (true) {
-            $buffer = $this->socketClient->read(2048);
-
-            if ($buffer === '') {
-                if ($this->socketClient->getLastError() !== 0) {
-                    $error = socket_strerror($this->socketClient->getLastError());
-                    throw new IcapClientException("Socket read error: {$error}");
-                }
-                break;
-            }
-
-            $response .= $buffer;
-
-            if (strlen($response) > $this->maxResponseSize) {
-                throw new IcapClientException('Maximum response size exceeded');
-            }
-
-            if ((microtime(true) - $startTime) > $this->readTimeout) {
-                throw new IcapClientException('Read timeout exceeded');
-            }
-        }
-
-        return $response;
+        return $this->transport->sendIterable($request);
     }
 
     /**
