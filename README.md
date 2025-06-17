@@ -14,7 +14,7 @@ The library offers a simple way to interact with Internet Content Adaptation Pro
 ## Installation
 
 ```
-composer require nathan242/php-icap-client
+composer require ndrstmr/php-icap-client
 ```
 
 ## Basic Usage
