@@ -65,12 +65,12 @@ class IcapResponseParser
                 foreach ($encapsulated as $section => $offset) {
                     $data = substr($body[1], (int)$offset);
                     switch ($section) {
-                        case IcapProtocolConstants::SECTION_REQ_HDR:
-                        case IcapProtocolConstants::SECTION_RES_HDR:
+                        case IcapBodySection::REQ_HDR->value:
+                        case IcapBodySection::RES_HDR->value:
                             $bodySections[$section] = preg_split('/\r?\n\r?\n/', $data, 2)[0];
                             break;
-                        case IcapProtocolConstants::SECTION_REQ_BODY:
-                        case IcapProtocolConstants::SECTION_RES_BODY:
+                        case IcapBodySection::REQ_BODY->value:
+                        case IcapBodySection::RES_BODY->value:
                             $parts = preg_split('/\r?\n/', $data, 2);
                             if (count($parts) === 2) {
                                 $bodySections[$section] = substr($parts[1], 0, hexdec($parts[0]));

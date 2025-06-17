@@ -33,8 +33,8 @@ class IcapRequestFormatter
         $encapsulated = [];
         foreach ($request->body as $type => $data) {
             switch ($type) {
-                case IcapProtocolConstants::SECTION_REQ_HDR:
-                case IcapProtocolConstants::SECTION_RES_HDR:
+                case IcapBodySection::REQ_HDR->value:
+                case IcapBodySection::RES_HDR->value:
                     $encapsulated[$type] = strlen($bodyData);
                     if (is_resource($data)) {
                         $content = stream_get_contents($data);
@@ -46,8 +46,8 @@ class IcapRequestFormatter
                     }
                     $bodyData .= $content;
                     break;
-                case IcapProtocolConstants::SECTION_REQ_BODY:
-                case IcapProtocolConstants::SECTION_RES_BODY:
+                case IcapBodySection::REQ_BODY->value:
+                case IcapBodySection::RES_BODY->value:
                     if (is_resource($data)) {
                         $content = stream_get_contents($data);
                         if ($content === false) {
@@ -68,7 +68,7 @@ class IcapRequestFormatter
         if ($hasBody) {
             $bodyData .= "0\r\n\r\n";
         } elseif (count($encapsulated) > 0) {
-            $encapsulated[IcapProtocolConstants::SECTION_NULL_BODY] = strlen($bodyData);
+            $encapsulated[IcapBodySection::NULL_BODY->value] = strlen($bodyData);
         }
 
         if (count($encapsulated) > 0) {
@@ -120,8 +120,8 @@ class IcapRequestFormatter
 
         foreach ($request->body as $type => $data) {
             switch ($type) {
-                case IcapProtocolConstants::SECTION_REQ_HDR:
-                case IcapProtocolConstants::SECTION_RES_HDR:
+                case IcapBodySection::REQ_HDR->value:
+                case IcapBodySection::RES_HDR->value:
                     $encapsulated[$type] = strlen($prefixData);
                     if (is_resource($data)) {
                         $content = stream_get_contents($data);
@@ -134,8 +134,8 @@ class IcapRequestFormatter
                     $prefixData .= $content;
                     break;
 
-                case IcapProtocolConstants::SECTION_REQ_BODY:
-                case IcapProtocolConstants::SECTION_RES_BODY:
+                case IcapBodySection::REQ_BODY->value:
+                case IcapBodySection::RES_BODY->value:
                     $encapsulated[$type] = strlen($prefixData);
                     $streamSection = $type;
                     if (is_iterable($data)) {
@@ -161,7 +161,7 @@ class IcapRequestFormatter
         }
 
         if ($streamSection === null && count($encapsulated) > 0) {
-            $encapsulated[IcapProtocolConstants::SECTION_NULL_BODY] = strlen($prefixData);
+            $encapsulated[IcapBodySection::NULL_BODY->value] = strlen($prefixData);
         }
 
         if (count($encapsulated) > 0) {
