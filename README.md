@@ -71,6 +71,19 @@ data is available (for example using `socket_set_nonblock()` or `stream_select`)
 The provided `PhpSocketClient` remains blocking by default but can be swapped
 out for a non‑blocking variant.
 
+### TLS Verification
+
+`TlsSocketConnection` verifies the server certificate and host name by default.
+You can override this behaviour by passing boolean flags to its constructor:
+
+```php
+use Ndrstmr\Icap\Socket\TlsSocketConnection;
+
+$socket = new TlsSocketConnection(0.0, 0.0, false, false); // disable checks
+```
+
+Both flags default to `true` to guard against man‑in‑the‑middle attacks.
+
 ## Running Tests
 
 Execute the following command to run the test suite:

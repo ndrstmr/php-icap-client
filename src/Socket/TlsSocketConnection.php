@@ -12,20 +12,24 @@ class TlsSocketConnection implements SocketClientInterface, IcapConnectionInterf
     private float $readTimeout;
     private float $writeTimeout;
     private int $lastError = 0;
+    private bool $verifyPeer;
+    private bool $verifyPeerName;
 
-    public function __construct(float $readTimeout = 0.0, float $writeTimeout = 0.0)
+    public function __construct(float $readTimeout = 0.0, float $writeTimeout = 0.0, bool $verifyPeer = true, bool $verifyPeerName = true)
     {
         $this->readTimeout = $readTimeout;
         $this->writeTimeout = $writeTimeout;
+        $this->verifyPeer = $verifyPeer;
+        $this->verifyPeerName = $verifyPeerName;
     }
 
     public function connect(string $host, int $port): bool
     {
         $context = stream_context_create([
             'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true,
+                'verify_peer' => $this->verifyPeer,
+                'verify_peer_name' => $this->verifyPeerName,
+                'allow_self_signed' => !$this->verifyPeer,
             ],
         ]);
         $uri = "tls://{$host}:{$port}";
