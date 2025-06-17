@@ -20,7 +20,7 @@ composer require nathan242/php-icap-client
 ## Basic Usage
 
 ```php
-use IcapClient\IcapClient;
+use Ndrstmr\Icap\IcapClient;
 
 $icap = new IcapClient('127.0.0.1', 13440);
 $result = $icap->options('example');
