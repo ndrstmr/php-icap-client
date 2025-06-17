@@ -12,7 +12,7 @@
 ## B. Softwarearchitektur
 
 ### Technologiestack
-- PHP (>=7.4)
+- PHP (>=8.2)
 - Composer
 
 ### Lösungsaufbau
@@ -35,7 +35,7 @@ Die Bibliothek selbst bildet die Drittanbieterlösung. Zusätzlich wird ein exte
 ## C. Bereitstellung der Lösung
 
 ### Installationsvorbereitungen
-- **Prerequisites (Software):** PHP >= 7.4, Composer.
+- **Prerequisites (Software):** PHP >= 8.2, Composer.
 - **Freischaltungen:** Ausgehende Firewall-Freigabe vom Host zum ICAP-Server auf dem konfigurierten Port (Standard 1344).
 - **Datenbanken:** Nicht erforderlich.
 - **Zertifikate:**

@@ -9,7 +9,7 @@ Eine robuste, moderne und testbare PHP-Implementierung eines ICAP-Clients. Diese
 - [README.md](../../README.md)
 
 ### Tools, Frameworks und Libraries
-- PHP (>=7.4)
+- PHP (>=8.2)
 - Composer
 - PHPUnit
 
