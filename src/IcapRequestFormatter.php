@@ -39,7 +39,7 @@ class IcapRequestFormatter
                     if (is_resource($data)) {
                         $content = stream_get_contents($data);
                         if ($content === false) {
-                            throw new Exception\IcapFileException('Unable to read body stream');
+                            throw new IcapFileException('Unable to read body stream');
                         }
                     } else {
                         $content = $data;
@@ -51,7 +51,7 @@ class IcapRequestFormatter
                     if (is_resource($data)) {
                         $content = stream_get_contents($data);
                         if ($content === false) {
-                            throw new Exception\IcapFileException('Unable to read body stream');
+                            throw new IcapFileException('Unable to read body stream');
                         }
                     } else {
                         $content = $data;
@@ -126,7 +126,7 @@ class IcapRequestFormatter
                     if (is_resource($data)) {
                         $content = stream_get_contents($data);
                         if ($content === false) {
-                            throw new Exception\IcapFileException('Unable to read body stream');
+                            throw new IcapFileException('Unable to read body stream');
                         }
                     } else {
                         $content = $data;

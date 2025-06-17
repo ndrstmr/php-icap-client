@@ -167,7 +167,7 @@ class IcapClient
     {
         $data = file_get_contents($filename);
         if ($data === false) {
-            throw new Exception\IcapFileException("Unable to read file: {$filename}");
+            throw new IcapFileException("Unable to read file: {$filename}");
         }
 
         return $data;
