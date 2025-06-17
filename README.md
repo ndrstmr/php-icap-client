@@ -8,7 +8,7 @@ The library offers a simple way to interact with Internet Content Adaptation Pro
 
 ## Requirements
 
-- PHP **7.4** or newer
+ - PHP **8.2** or newer
 - Composer for installing dependencies
 
 ## Installation
