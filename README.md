@@ -84,6 +84,24 @@ $socket = new TlsSocketConnection(0.0, 0.0, false, false); // disable checks
 
 Both flags default to `true` to guard against man‑in‑the‑middle attacks.
 
+### PSR‑18 Transport
+
+An optional `Psr18Transport` allows using any PSR‑18 compatible HTTP client for
+the underlying network operations. This makes integration with existing
+frameworks straightforward:
+
+```php
+use Ndrstmr\Icap\Transport\Psr18Transport;
+use Nyholm\Psr7\Factory\Psr17Factory;
+
+$factory = new Psr17Factory();
+$transport = new Psr18Transport('icap.test', 1344, $httpClient, $factory, $factory);
+$icap = new IcapClient('icap.test', 1344, $transport);
+```
+
+The HTTP client implementation is injected so you are free to choose any
+library that fulfils the PSR‑18 `ClientInterface`.
+
 ## Running Tests
 
 Execute the following command to run the test suite:
