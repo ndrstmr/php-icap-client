@@ -41,6 +41,36 @@ $icap->respmod('example', [
 ]);
 ```
 
+## Example with Streaming and Error Handling
+
+The client can stream body data directly from a file handle or iterable. All
+operations throw `IcapClientException` derivatives to make error handling
+straightforward.
+
+```php
+use Ndrstmr\Icap\IcapClient;
+use Ndrstmr\Icap\Exception\IcapClientException;
+
+$icap = new IcapClient('icap.test', 1344);
+$handle = fopen('/path/to/file.bin', 'rb');
+
+try {
+    $response = $icap->respmodStream('example', [
+        'res-hdr'  => "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\n\r\n",
+        'res-body' => $handle,
+    ]);
+
+    echo "ICAP status: {$response['protocol']['code']}\n";
+} catch (IcapClientException $e) {
+    // Connection failures, timeouts and invalid responses all derive from this
+    echo "Request failed: {$e->getMessage()}\n";
+} finally {
+    if (is_resource($handle)) {
+        fclose($handle);
+    }
+}
+```
+
 ## Architecture
 
 - **IcapClient** – high-level API that uses the formatter, parser and socket implementation.
