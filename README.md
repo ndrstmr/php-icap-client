@@ -64,6 +64,22 @@ The transport reads data in chunks controlled by `setReadBufferSize()`. The
 default buffer size is 8192 bytes. Reduce this value when working with
 non‑blocking socket clients to limit how much data is read at a time.
 
+### Client Configuration
+
+`IcapClientFactory::create()` accepts an optional `IcapClientConfig` allowing
+you to override defaults like the user agent string or maximum response size:
+
+```php
+use Ndrstmr\Icap\IcapClientFactory;
+use Ndrstmr\Icap\IcapClientConfig;
+
+$config = new IcapClientConfig(
+    maxResponseSize: 2097152,
+    userAgent: 'MyApp/1.0'
+);
+$icap = IcapClientFactory::create('icap.test', 1344, false, $config);
+```
+
 ### Non‑blocking Sockets
 
 Custom implementations of `SocketClientInterface` may return immediately when no
