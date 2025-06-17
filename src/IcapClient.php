@@ -51,7 +51,7 @@ class IcapClient
     )
     {
         $this->host = $host;
-        $this->transport = $transport ?? new IcapTransport($host, $port, new \IcapClient\Socket\PhpSocketClient());
+        $this->transport = $transport ?? new IcapTransport($host, $port, new \Ndrstmr\Icap\Socket\PhpSocketClient());
         $this->requestFormatter = $requestFormatter ?? new IcapRequestFormatter();
         $this->responseParser = $responseParser ?? new IcapResponseParser();
     }
