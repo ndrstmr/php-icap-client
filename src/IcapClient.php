@@ -184,9 +184,7 @@ class IcapClient
      */
     public function getRequest(string $method, string $service, array $body = [], array $headers = []): string
     {
-        if (!isset($headers[IcapProtocolConstants::HEADER_USER_AGENT])) {
-            $headers[IcapProtocolConstants::HEADER_USER_AGENT] = $this->userAgent;
-        }
+        // Rely on the formatter to add required headers in a defined order
 
         $icapRequest = new IcapRequest($method, $this->host, $service, $headers, $body);
 
@@ -199,9 +197,7 @@ class IcapClient
      */
     public function getRequestIterable(string $method, string $service, array $body = [], array $headers = []): iterable
     {
-        if (!isset($headers[IcapProtocolConstants::HEADER_USER_AGENT])) {
-            $headers[IcapProtocolConstants::HEADER_USER_AGENT] = $this->userAgent;
-        }
+        // Rely on the formatter to add required headers in a defined order
 
         $icapRequest = new IcapRequest($method, $this->host, $service, $headers, $body);
 
