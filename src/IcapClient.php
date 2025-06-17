@@ -209,7 +209,7 @@ class IcapClient
      */
     public function options(string $service): array
     {
-        $request = $this->getRequest(IcapProtocolConstants::METHOD_OPTIONS, $service);
+        $request = $this->getRequest(IcapMethod::OPTIONS->value, $service);
         $response = $this->send($request);
 
         return $this->parseResponse($response);
@@ -226,7 +226,7 @@ class IcapClient
      */
     public function respmod(string $service, array $body = [], array $headers = []): array
     {
-        $request = $this->getRequest(IcapProtocolConstants::METHOD_RESPMOD, $service, $body, $headers);
+        $request = $this->getRequest(IcapMethod::RESPMOD->value, $service, $body, $headers);
         $response = $this->send($request);
 
         return $this->parseResponse($response);
@@ -237,7 +237,7 @@ class IcapClient
      */
     public function respmodStream(string $service, array $body = [], array $headers = []): array
     {
-        $request = $this->getRequestIterable(IcapProtocolConstants::METHOD_RESPMOD, $service, $body, $headers);
+        $request = $this->getRequestIterable(IcapMethod::RESPMOD->value, $service, $body, $headers);
         $response = $this->sendIterable($request);
 
         return $this->parseResponse($response);
@@ -254,7 +254,7 @@ class IcapClient
      */
     public function reqmod(string $service, array $body = [], array $headers = []): array
     {
-        $request = $this->getRequest(IcapProtocolConstants::METHOD_REQMOD, $service, $body, $headers);
+        $request = $this->getRequest(IcapMethod::REQMOD->value, $service, $body, $headers);
         $response = $this->send($request);
 
         return $this->parseResponse($response);
@@ -265,7 +265,7 @@ class IcapClient
      */
     public function reqmodStream(string $service, array $body = [], array $headers = []): array
     {
-        $request = $this->getRequestIterable(IcapProtocolConstants::METHOD_REQMOD, $service, $body, $headers);
+        $request = $this->getRequestIterable(IcapMethod::REQMOD->value, $service, $body, $headers);
         $response = $this->sendIterable($request);
 
         return $this->parseResponse($response);
