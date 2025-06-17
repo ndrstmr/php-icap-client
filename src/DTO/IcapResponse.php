@@ -6,7 +6,7 @@ namespace Ndrstmr\Icap\DTO;
 /**
  * Data transfer object describing an ICAP response.
  */
-class IcapResponse
+final readonly class IcapResponse
 {
     /** @var array<string,string> */
     public array $protocol;

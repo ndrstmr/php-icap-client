@@ -6,7 +6,7 @@ namespace Ndrstmr\Icap\DTO;
 /**
  * Data transfer object describing an ICAP request.
  */
-class IcapRequest
+final readonly class IcapRequest
 {
     public string $method;
     public string $host;

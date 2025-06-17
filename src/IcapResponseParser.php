@@ -18,15 +18,18 @@ class IcapResponseParser
      */
     public function parse(string $response): IcapResponse
     {
-        $result = new IcapResponse();
+        $protocol = [];
+        $headers = [];
+        $bodySections = [];
+        $rawBody = '';
 
         foreach (preg_split('/\r?\n/', $response) as $line) {
-            if ([] === $result->protocol) {
+            if ([] === $protocol) {
                 if (0 !== strpos($line, IcapProtocolConstants::PROTOCOL_PREFIX)) {
                     throw new IcapParseException('Unknown ICAP response');
                 }
                 $parts = preg_split('/\ +/', $line, 3);
-                $result->protocol = [
+                $protocol = [
                     'icap' => $parts[0] ?? '',
                     'code' => $parts[1] ?? '',
                     'message' => $parts[2] ?? '',
@@ -40,16 +43,16 @@ class IcapResponseParser
 
             $parts = preg_split('/:\ /', $line, 2);
             if (isset($parts[0])) {
-                $result->headers[$parts[0]] = $parts[1] ?? '';
+                $headers[$parts[0]] = $parts[1] ?? '';
             }
         }
 
         $body = preg_split('/\r?\n\r?\n/', $response, 2);
         if (isset($body[1])) {
-            $result->rawBody = $body[1];
-            if (array_key_exists(IcapProtocolConstants::HEADER_ENCAPSULATED, $result->headers)) {
+            $rawBody = $body[1];
+            if (array_key_exists(IcapProtocolConstants::HEADER_ENCAPSULATED, $headers)) {
                 $encapsulated = [];
-                $params = preg_split('/, /', $result->headers[IcapProtocolConstants::HEADER_ENCAPSULATED]);
+                $params = preg_split('/, /', $headers[IcapProtocolConstants::HEADER_ENCAPSULATED]);
                 if (count($params) > 0) {
                     foreach ($params as $param) {
                         $parts = preg_split('/=/', $param);
@@ -64,13 +67,13 @@ class IcapResponseParser
                     switch ($section) {
                         case IcapProtocolConstants::SECTION_REQ_HDR:
                         case IcapProtocolConstants::SECTION_RES_HDR:
-                            $result->body[$section] = preg_split('/\r?\n\r?\n/', $data, 2)[0];
+                            $bodySections[$section] = preg_split('/\r?\n\r?\n/', $data, 2)[0];
                             break;
                         case IcapProtocolConstants::SECTION_REQ_BODY:
                         case IcapProtocolConstants::SECTION_RES_BODY:
                             $parts = preg_split('/\r?\n/', $data, 2);
                             if (count($parts) === 2) {
-                                $result->body[$section] = substr($parts[1], 0, hexdec($parts[0]));
+                                $bodySections[$section] = substr($parts[1], 0, hexdec($parts[0]));
                             }
                             break;
                     }
@@ -78,6 +81,6 @@ class IcapResponseParser
             }
         }
 
-        return $result;
+        return new IcapResponse($protocol, $headers, $bodySections, $rawBody);
     }
 }
