@@ -2,11 +2,11 @@
 namespace Ndrstmr\Icap\Tests;
 
 use Ndrstmr\Icap\Transport\IcapTransport;
-use Ndrstmr\Icap\Socket\SocketClientInterface;
+use Ndrstmr\Icap\Socket\IcapConnectionInterface;
 use Ndrstmr\Icap\Exception\IcapTimeoutException;
 use PHPUnit\Framework\TestCase;
 
-class StreamingSocketClient implements SocketClientInterface
+class StreamingSocketClient implements IcapConnectionInterface
 {
     private array $chunks;
     private float $delay;

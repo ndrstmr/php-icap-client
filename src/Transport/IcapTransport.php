@@ -7,16 +7,16 @@ use Ndrstmr\Icap\Exception\IcapClientException;
 use Ndrstmr\Icap\Exception\IcapConnectionException;
 use Ndrstmr\Icap\Exception\IcapTimeoutException;
 use Ndrstmr\Icap\Socket\PhpSocketClient;
-use Ndrstmr\Icap\Socket\SocketClientInterface;
+use Ndrstmr\Icap\Socket\IcapConnectionInterface;
 
 /**
- * Default transport implementation using {@link SocketClientInterface}.
+ * Default transport implementation using {@link IcapConnectionInterface}.
  */
 class IcapTransport implements TransportInterface
 {
     private string $host;
     private int $port;
-    private SocketClientInterface $socketClient;
+    private IcapConnectionInterface $socketClient;
 
     private bool $persistentConnection = false;
     private bool $connected = false;
@@ -25,7 +25,7 @@ class IcapTransport implements TransportInterface
     /** @var int Size of read buffer in bytes */
     private int $readBufferSize = 8192;
 
-    public function __construct(string $host, int $port, SocketClientInterface $socketClient = null)
+    public function __construct(string $host, int $port, IcapConnectionInterface $socketClient = null)
     {
         $this->host = $host;
         $this->port = $port;

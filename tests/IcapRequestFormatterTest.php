@@ -53,6 +53,23 @@ class IcapRequestFormatterTest extends TestCase
         $this->assertStringNotContainsString("\nInjected:", $result);
     }
 
+    public function testHeaderNameInjectionIsSanitized()
+    {
+        $request = new IcapRequest(
+            'OPTIONS',
+            'icap.test',
+            'example',
+            [
+                "X-Te\nst" => 'bar'
+            ]
+        );
+
+        $formatter = new IcapRequestFormatter();
+        $result = $formatter->format($request);
+
+        $this->assertStringContainsString("X-Test: bar\r\n", $result);
+    }
+
     public function testFormatIterableMatchesFormat()
     {
         $request = new IcapRequest(

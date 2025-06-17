@@ -8,7 +8,7 @@ use Socket;
 /**
  * Socket implementation using PHP's socket extension.
  */
-class PhpSocketClient implements SocketClientInterface
+class PhpSocketClient implements SocketClientInterface, IcapConnectionInterface
 {
     private ?Socket $socket = null;
 
