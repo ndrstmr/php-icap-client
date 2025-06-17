@@ -16,7 +16,7 @@ Diese Bibliothek stellt einen PHP-Client für das **Internet Content Adaptation 
 
 ## 2. Randbedingungen
 ### Technisch
-- Benötigt **PHP 7.4** oder neuer.
+- Benötigt **PHP 8.2** oder neuer.
 - Distribution und Autoloading erfolgen über **Composer**.
 
 ### Organisatorisch
