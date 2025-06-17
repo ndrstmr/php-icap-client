@@ -1,0 +1,38 @@
+<?php
+namespace Ndrstmr\Icap\Tests;
+
+use Ndrstmr\Icap\IcapClientFactory;
+use Ndrstmr\Icap\Socket\TlsSocketConnection;
+use Ndrstmr\Icap\Socket\PhpSocketClient;
+use PHPUnit\Framework\TestCase;
+
+class IcapClientFactoryTest extends TestCase
+{
+    public function testCreateDefaultReturnsPhpSocketClient()
+    {
+        $client = IcapClientFactory::create('icap.test', 1344);
+        $ref = new \ReflectionClass($client);
+        $prop = $ref->getProperty('transport');
+        $prop->setAccessible(true);
+        $transport = $prop->getValue($client);
+        $refTrans = new \ReflectionClass($transport);
+        $sprop = $refTrans->getProperty('socketClient');
+        $sprop->setAccessible(true);
+        $socket = $sprop->getValue($transport);
+        $this->assertInstanceOf(PhpSocketClient::class, $socket);
+    }
+
+    public function testCreateWithTlsReturnsTlsSocketConnection()
+    {
+        $client = IcapClientFactory::create('icap.test', 1344, true);
+        $ref = new \ReflectionClass($client);
+        $prop = $ref->getProperty('transport');
+        $prop->setAccessible(true);
+        $transport = $prop->getValue($client);
+        $refTrans = new \ReflectionClass($transport);
+        $sprop = $refTrans->getProperty('socketClient');
+        $sprop->setAccessible(true);
+        $socket = $sprop->getValue($transport);
+        $this->assertInstanceOf(TlsSocketConnection::class, $socket);
+    }
+}

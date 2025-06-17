@@ -82,8 +82,9 @@ class IcapRequestFormatter
         $result = "{$request->method} icap://{$request->host}/{$request->service} " .
             IcapProtocolConstants::PROTOCOL_PREFIX . IcapProtocolConstants::PROTOCOL_VERSION . "\r\n";
         foreach ($headers as $header => $value) {
+            $sanitizedHeader = str_replace(["\r", "\n"], '', $header);
             $sanitizedValue = str_replace(["\r", "\n"], '', $value);
-            $result .= "{$header}: {$sanitizedValue}\r\n";
+            $result .= "{$sanitizedHeader}: {$sanitizedValue}\r\n";
         }
 
         $result .= "\r\n";
@@ -176,8 +177,9 @@ class IcapRequestFormatter
             IcapProtocolConstants::PROTOCOL_PREFIX . IcapProtocolConstants::PROTOCOL_VERSION . "\r\n";
         $headerString = '';
         foreach ($headers as $header => $value) {
+            $sanitizedHeader = str_replace(["\r", "\n"], '', $header);
             $sanitizedValue = str_replace(["\r", "\n"], '', $value);
-            $headerString .= "{$header}: {$sanitizedValue}\r\n";
+            $headerString .= "{$sanitizedHeader}: {$sanitizedValue}\r\n";
         }
 
         yield $requestLine . $headerString . "\r\n" . $prefixData;

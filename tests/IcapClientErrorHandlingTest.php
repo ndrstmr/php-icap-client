@@ -2,11 +2,11 @@
 namespace Ndrstmr\Icap\Tests;
 
 use Ndrstmr\Icap\IcapClient;
-use Ndrstmr\Icap\Socket\SocketClientInterface;
+use Ndrstmr\Icap\Socket\IcapConnectionInterface;
 use Ndrstmr\Icap\Transport\IcapTransport;
 use PHPUnit\Framework\TestCase;
 
-class FailingSocketClient implements SocketClientInterface
+class FailingSocketClient implements IcapConnectionInterface
 {
     public function connect(string $host, int $port): bool { return false; }
     public function write(string $data): int { return 0; }
@@ -20,7 +20,7 @@ class FailingSocketClient implements SocketClientInterface
     public function waitForData(float $timeout): bool { return false; }
 }
 
-class InvalidResponseSocketClient implements SocketClientInterface
+class InvalidResponseSocketClient implements IcapConnectionInterface
 {
     private array $responses;
     public function __construct(array $responses) { $this->responses = $responses; }
@@ -36,7 +36,7 @@ class InvalidResponseSocketClient implements SocketClientInterface
     public function waitForData(float $timeout): bool { return true; }
 }
 
-class TimeoutSocketClient implements SocketClientInterface
+class TimeoutSocketClient implements IcapConnectionInterface
 {
     private float $readTimeout = 0.0;
     public function connect(string $host, int $port): bool { return true; }
