@@ -73,3 +73,7 @@ Eigene Exception-Klassen decken typische Fehler ab:
 
 ### Abhängigkeitsinjektion
 Über das `SocketClientInterface` lassen sich unterschiedliche Socket-Implementierungen verwenden. Dadurch ist der Transport austauschbar und Tests können mit Mock-Implementierungen arbeiten.
+
+### TLS-Optionen
+
+`TlsSocketConnection` erlaubt seit Version 1.1 die Steuerung von `verify_peer` und `verify_peer_name` über den Konstruktor. Beide Parameter sind standardmäßig aktiviert, um Man-in-the-Middle-Angriffe zu verhindern. Bei Bedarf können sie auf `false` gesetzt werden, etwa für Testumgebungen mit selbstsignierten Zertifikaten.
