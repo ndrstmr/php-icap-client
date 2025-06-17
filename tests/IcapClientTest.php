@@ -45,7 +45,7 @@ class IcapClientTest extends TestCase
 
         $transport = new IcapTransport('icap.test', 1344, new PhpSocketClient());
         $client = new IcapClient('icap.test', 1344, $transport);
-        $ref = new ReflectionClass($client);
+        $ref = new \ReflectionClass($client);
         $method = $ref->getMethod('parseResponse');
         $method->setAccessible(true);
         $result = $method->invoke($client, $response);
@@ -76,11 +76,11 @@ class IcapClientTest extends TestCase
     {
         $transport = new IcapTransport('icap.test', 1344, new PhpSocketClient());
         $client = new IcapClient('icap.test', 1344, $transport);
-        $ref = new ReflectionClass($client);
+        $ref = new \ReflectionClass($client);
         $method = $ref->getMethod('readFile');
         $method->setAccessible(true);
 
-        $this->expectException(\IcapClient\Exception\IcapFileException::class);
+        $this->expectException(\Ndrstmr\Icap\Exception\IcapFileException::class);
         @$method->invoke($client, '/does/not/exist');
     }
 }
