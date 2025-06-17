@@ -60,7 +60,7 @@ class IcapClientErrorHandlingTest extends TestCase
     {
         $transport = new IcapTransport('icap.test', 1344, new FailingSocketClient());
         $client = new IcapClient('icap.test', 1344, $transport);
-        $this->expectException(\IcapClient\Exception\IcapConnectionException::class);
+        $this->expectException(\Ndrstmr\Icap\Exception\IcapConnectionException::class);
         $client->options('example');
     }
 
@@ -69,7 +69,7 @@ class IcapClientErrorHandlingTest extends TestCase
         $socket = new InvalidResponseSocketClient(['BAD DATA', '']);
         $transport = new IcapTransport('icap.test', 1344, $socket);
         $client = new IcapClient('icap.test', 1344, $transport);
-        $this->expectException(\IcapClient\Exception\IcapParseException::class);
+        $this->expectException(\Ndrstmr\Icap\Exception\IcapParseException::class);
         $client->options('example');
     }
 
@@ -79,7 +79,7 @@ class IcapClientErrorHandlingTest extends TestCase
         $transport = new IcapTransport('icap.test', 1344, $socket);
         $transport->setReadTimeout(0.1);
         $client = new IcapClient('icap.test', 1344, $transport);
-        $this->expectException(\IcapClient\Exception\IcapTimeoutException::class);
+        $this->expectException(\Ndrstmr\Icap\Exception\IcapTimeoutException::class);
         $client->options('example');
     }
 }

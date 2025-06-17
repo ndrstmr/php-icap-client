@@ -53,7 +53,7 @@ class IcapResponseParserTest extends TestCase
     public function testInvalidResponseThrowsException()
     {
         $parser = new IcapResponseParser();
-        $this->expectException(\IcapClient\Exception\IcapParseException::class);
+        $this->expectException(\Ndrstmr\Icap\Exception\IcapParseException::class);
         $parser->parse('BAD');
     }
 }
