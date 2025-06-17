@@ -12,11 +12,25 @@ use Ndrstmr\Icap\Transport\IcapTransport;
  */
 final class IcapClientFactory
 {
-    public static function create(string $host, int $port, bool $tls = false): IcapClient
+    public static function create(
+        string $host,
+        int $port,
+        bool $tls = false,
+        ?IcapClientConfig $config = null
+    ): IcapClient
     {
         $connection = $tls ? new TlsSocketConnection() : new PhpSocketClient();
         $transport = new IcapTransport($host, $port, $connection);
 
-        return new IcapClient($host, $port, $transport);
+        $config ??= new IcapClientConfig();
+        $transport->setMaxResponseSize($config->maxResponseSize);
+        $transport->setReadTimeout($config->readTimeout);
+        $transport->setReadBufferSize($config->readBufferSize);
+        $transport->setPersistentConnection($config->persistentConnection);
+
+        $client = new IcapClient($host, $port, $transport);
+        $client->setUserAgent($config->userAgent);
+
+        return $client;
     }
 }
